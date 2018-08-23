@@ -1,0 +1,32 @@
+name: CVHome
+main: org.cubeville.cvhome.CVHome
+author: unixadmin
+version: 0.1
+
+depend: [CVTools]
+
+commands:
+  sethome:
+    description: Set a home command
+  home:
+    description: Teleport to a home command
+
+permissions:
+  cvhome.max.1:
+    description: Maximum of 1 home.
+    default: true
+  cvhome.max.2:
+    description: Maximum of 2 homes.
+    default: op
+  cvhome.max.3:
+    description: Maximum of 3 homes.
+    default: false
+  cvhome.max.4:
+    description: Maximum of 4 homes.
+    default: false
+  cvhome.admin.sethome:
+    description: Admin override to set homes for any player.
+    default: op
+  cvhome.admin.teleporthome:
+    description: Admin override to teleport to any players' homes.
+    default: op

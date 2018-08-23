@@ -18,14 +18,15 @@ public class Home implements ConfigurationSerializable {
     private int maxHomes;
     private UUID playerId;
     
-    public Home(UUID playerId, int maxHomes) {
+    public Home(UUID playerId) {
+        
+        if(playerId == null) { throw new IllegalArgumentException(); }
+        
         this.home1 = null;
         this.home2 = null;
         this.home3 = null;
         this.home4 = null;
-        if(maxHomes < 1) { this.maxHomes = 1; }
-        else if(maxHomes > 4) { this.maxHomes = 4; }
-        else { this.maxHomes = maxHomes; }
+        this.maxHomes = 1;
         this.playerId = playerId;
     }
     
@@ -86,9 +87,8 @@ public class Home implements ConfigurationSerializable {
     }
     
     public void setMaxHomes(int maxHomes) {
-        if(maxHomes < 1) { this.maxHomes = 1; }
-        else if(maxHomes > 4) { this.maxHomes = 4; }
-        else { this.maxHomes = maxHomes; }
+        if(maxHomes < 1 || maxHomes > 4) { throw new IndexOutOfBoundsException(); }
+        this.maxHomes = maxHomes;
     }
     
     public UUID getPlayerId() {
@@ -96,6 +96,8 @@ public class Home implements ConfigurationSerializable {
     }
     
     public void setPlayerId(UUID playerId) {
+        if(playerId == null) { throw new IllegalArgumentException(); }
         this.playerId = playerId;
     }
+    
 }
