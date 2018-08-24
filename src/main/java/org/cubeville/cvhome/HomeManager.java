@@ -71,7 +71,7 @@ public class HomeManager implements Listener {
             IndexOutOfBoundsException, NoAdminPermissionException, PlayerHomeNotFoundException {
         
         if(senderId == null || playerId == null) { throw new IllegalArgumentException(); }
-        if((!senderId.equals(playerId)) &&(!adminOverride)) { throw new NoAdminPermissionException(); }
+        if((!senderId.equals(playerId)) && (!adminOverride)) { throw new NoAdminPermissionException(); }
         if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
         
         Home playerHome = getPlayerHome(playerId);
@@ -82,6 +82,25 @@ public class HomeManager implements Listener {
         if(homeNumber == 4) { return playerHome.getHome4(); }
         else if(homeNumber == 3) { return playerHome.getHome3(); }
         else if(homeNumber == 2) { return playerHome.getHome2(); }
+        else { return playerHome.getHome1(); }
+    }
+    
+    public Location getPlayerHomeInfo(UUID playerId, int homeNumber, boolean adminOverride)
+            throws AdditionalHomeNotPermittedException, IllegalArgumentException,
+            IndexOutOfBoundsException, NoAdminPermissionException, PlayerHomeNotFoundException {
+        
+        if(playerId == null) { throw new IllegalArgumentException(); }
+        if(!adminOverride) { throw new NoAdminPermissionException(); }
+        if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
+        
+        Home playerHome = getPlayerHome(playerId);
+        
+        if(playerHome == null) { throw new PlayerHomeNotFoundException(); }
+        if(checkMaxHomes(playerId) < homeNumber) { throw new AdditionalHomeNotPermittedException(); }
+        
+        if(homeNumber == 4) { return playerHome.getHome4(); }
+        else if (homeNumber == 3) { return playerHome.getHome3(); }
+        else if (homeNumber == 2) { return playerHome.getHome2(); }
         else { return playerHome.getHome1(); }
     }
     

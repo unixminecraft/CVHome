@@ -6,12 +6,14 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.cubeville.commons.commands.CommandParser;
+import org.cubeville.cvhome.commands.HomeInfo;
 import org.cubeville.cvhome.commands.HomeSet;
 import org.cubeville.cvhome.commands.HomeTeleport;
 
 public class CVHome extends JavaPlugin {
 
     private HomeManager homeManager;
+    private CommandParser infoHomeCommandParser;
     private CommandParser setHomeCommandParser;
     private CommandParser tpHomeCommandParser;
     
@@ -29,6 +31,9 @@ public class CVHome extends JavaPlugin {
         
         this.homeManager = new HomeManager(this);
         
+        this.infoHomeCommandParser = new CommandParser();
+        this.infoHomeCommandParser.addCommand(new HomeInfo());
+        
         this.setHomeCommandParser = new CommandParser();
         this.setHomeCommandParser.addCommand(new HomeSet());
         
@@ -43,7 +48,10 @@ public class CVHome extends JavaPlugin {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(command.getName().equals("sethome")) {
+        if (command.getName().equals("homeinfo")) {
+            return this.infoHomeCommandParser.execute(sender, args);
+        }
+        else if(command.getName().equals("sethome")) {
             return this.setHomeCommandParser.execute(sender, args);
         }
         else if (command.getName().equals("home")) {

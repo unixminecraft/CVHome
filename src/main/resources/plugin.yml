@@ -10,6 +10,8 @@ commands:
     description: Set a home command
   home:
     description: Teleport to a home command
+  homeinfo:
+    description: Get information on a home
 
 permissions:
   cvhome.max.1:
@@ -29,4 +31,7 @@ permissions:
     default: op
   cvhome.admin.teleporthome:
     description: Admin override to teleport to any players' homes.
+    default: op
+  cvhome.admin.infohome:
+    description: Admin override to get a player's home information.
     default: op

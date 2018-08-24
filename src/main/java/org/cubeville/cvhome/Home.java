@@ -36,12 +36,12 @@ public class Home implements ConfigurationSerializable {
         this.home3 = (Location) config.get("home3");
         this.home4 = (Location) config.get("home4");
         this.maxHomes = ((Integer) config.get("maxhomes")).intValue();
-        this.playerId = (UUID) config.get("playerid");
+        this.playerId = UUID.fromString((String) config.get("playerid"));
     }
     
     public Map<String, Object> serialize() {
         Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("playerid", this.playerId);
+        ret.put("playerid", this.playerId.toString());
         ret.put("maxhomes", Integer.valueOf(this.maxHomes));
         ret.put("home1", this.home1);
         ret.put("home2", this.home2);
