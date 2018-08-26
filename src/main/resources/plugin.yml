@@ -12,6 +12,8 @@ commands:
     description: Teleport to a home command
   homeinfo:
     description: Get information on a home
+  homeimport:
+    description: Import player homes from previous plugin
 
 permissions:
   cvhome.max.1:
@@ -34,4 +36,7 @@ permissions:
     default: op
   cvhome.admin.infohome:
     description: Admin override to get a player's home information.
+    default: op
+  cvhome.admin.importhome:
+    description: Admin override to import players' homes from previous plugins.
     default: op

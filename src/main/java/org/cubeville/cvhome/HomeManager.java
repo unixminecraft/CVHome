@@ -135,6 +135,11 @@ public class HomeManager implements Listener {
         setPlayerHome(player.getUniqueId(), playerHome);
     }
     
+    public void setHomesFromImport(List<Home> playerHomes) {
+        this.playerHomes = playerHomes;
+        save();
+    }
+    
     private int checkMaxHomes(UUID playerId) {
         Home playerHome = getPlayerHome(playerId);
         return playerHome.getMaxHomes();
