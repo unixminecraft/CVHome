@@ -5,12 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -26,7 +23,6 @@ import org.cubeville.commons.commands.CommandResponse;
 
 import org.cubeville.cvhome.Home;
 import org.cubeville.cvhome.HomeManager;
-import org.cubeville.cvhome.TempHome;
 
 public class HomeImport extends Command {
 
@@ -83,126 +79,58 @@ public class HomeImport extends Command {
             line = linesReadIn.get(i);
             splitLine = line.split(delimiter);
             for(int j = 0; j < 8; j++) {
-                linesArray[i][j] = splitLine[j];
+                linesArray[i][j] = splitLine[j].substring(1, splitLine[j].length() - 1);
             }
         }
         
-        UUID possiblePlayerId = null;
-        Map<UUID, Integer> numberOfHomesPerPlayer = new HashMap<UUID, Integer>();
-        int temp;
-        TempHome possibleHome = null;
-        Location possibleLocation = null;
-        List<TempHome> possibleHomes = new ArrayList<TempHome>();
-        
-        for(int i = 0; i < linesArray.length; i++) {
-            try {
-                possiblePlayerId = UUID.fromString(linesArray[i][2]);
-            }
-            catch (IllegalArgumentException e) {
-                continue;
-            }
-            try {
-                possibleLocation = new Location(Bukkit.getWorld(linesArray[i][1]), Double.parseDouble(linesArray[i][3]),
-                        Double.parseDouble(linesArray[i][4]), Double.parseDouble(linesArray[i][5]),
-                        Float.parseFloat(linesArray[i][7]), Float.parseFloat(linesArray[i][6]));
-            }
-            catch (NullPointerException | NumberFormatException e) {
-                continue;
-            }
-            
-            possibleHome = new TempHome(possibleLocation, linesArray[i][0], possiblePlayerId);
-            possibleHomes.add(possibleHome);
-            
-            if(numberOfHomesPerPlayer.containsKey(possiblePlayerId)) {
-                temp = numberOfHomesPerPlayer.get(possiblePlayerId).intValue() + 1;
-                numberOfHomesPerPlayer.replace(possiblePlayerId, Integer.valueOf(temp));
-            } else {
-                numberOfHomesPerPlayer.put(possiblePlayerId, Integer.valueOf(1));
-            }
-        }
-        
-        Iterator<UUID> uuidCountIterator = numberOfHomesPerPlayer.keySet().iterator();
-        UUID tempHomeUUID = null;
-        TempHome singleTempHome = null;
-        Home singleHome = null;
-        List<Home> singleHomes = new ArrayList<Home>();
-        List<TempHome> retTempHomes = null;
-        List<TempHome> multipleTempHomes = new ArrayList<TempHome>();
-        List<UUID> multipleHomeUUID = new ArrayList<UUID>();
-        
-        while(uuidCountIterator.hasNext()) {
-            tempHomeUUID = uuidCountIterator.next();
-            if(numberOfHomesPerPlayer.get(tempHomeUUID).intValue() == 1) {
-                singleTempHome = findTempHome(tempHomeUUID, possibleHomes);
-                singleHome = new Home(singleTempHome.getPlayerId());
-                singleHome.setHome1(singleTempHome.getHome());
-                singleHomes.add(singleHome);
-            }
-            else {
-                multipleHomeUUID.add(tempHomeUUID);
-                retTempHomes = findTempHomes(tempHomeUUID, possibleHomes);
-                for(TempHome retTempHome: retTempHomes) {
-                    multipleTempHomes.add(retTempHome);
-                }
-            }
-        }
-        
-        List<TempHome> possibleMultiHomes = null;
+        String possiblePlayerName = "";
         HomeManager homeManager = HomeManager.getInstance();
         OfflinePlayer[] offlinePlayers = homeManager.getPlugin().getServer().getOfflinePlayers();
-        Home multipleToSingleHome = null;
-        List<Home> multipleToSingleHomes = new ArrayList<Home>();
+        OfflinePlayer offlinePlayer = null;
+        Home playerHome = null;
+        Location homeLocation = null;
+        List<Home> playerHomes = new ArrayList<Home>();
         
-        for(UUID multiUUID: multipleHomeUUID) {
-            possibleMultiHomes = findTempHomes(multiUUID, multipleTempHomes);
-            for(TempHome tempHome: possibleMultiHomes) {
-                if(doesPlayerExist(tempHome, offlinePlayers)) {
-                    multipleToSingleHome = new Home(tempHome.getPlayerId());
-                    multipleToSingleHome.setHome1(tempHome.getHome());
-                    multipleToSingleHomes.add(multipleToSingleHome);
-                    break;
-                }
-            }
+        for(int i = 0; i < linesArray.length; i++) {
+           possiblePlayerName = linesArray[i][0];
+           if(containsOfflinePlayer(offlinePlayers, possiblePlayerName)) {
+               offlinePlayer = getOfflinePlayer(offlinePlayers, possiblePlayerName);
+               playerHome = new Home(offlinePlayer.getUniqueId());
+               try {
+                   homeLocation = new Location(Bukkit.getWorld(linesArray[i][1]), Double.parseDouble(linesArray[i][3]),
+                           Double.parseDouble(linesArray[i][4]), Double.parseDouble(linesArray[i][5]),
+                           Float.parseFloat(linesArray[i][7]), Float.parseFloat(linesArray[i][6]));
+               }
+               catch(NullPointerException | NumberFormatException e) {
+                   player.sendMessage(ChatColor.RED + "Problem reading in Location on line " + ChatColor.AQUA + i);
+                   continue;
+               }
+               playerHome.setHome1(homeLocation);
+               playerHomes.add(playerHome);
+           }
         }
         
-        List<Home> finalHomesToAdd = new ArrayList<Home>();
-        for(Home finalSingleHome: singleHomes) {
-            finalHomesToAdd.add(finalSingleHome);
-        }
-        for(Home finalMultipleToSingleHome: multipleToSingleHomes) {
-            finalHomesToAdd.add(finalMultipleToSingleHome);
-        }
-        
-        homeManager.setHomesFromImport(finalHomesToAdd);
-        
+        homeManager.setHomesFromImport(playerHomes);
+       
         return new CommandResponse("&aImport complete.");
+        
     }
     
-    private TempHome findTempHome(UUID playerId, List<TempHome> tempHomes) {
-        for(TempHome tempHome: tempHomes) {
-            if(tempHome.getPlayerId().equals(playerId)) {
-                return tempHome;
-            }
-        }
-        return null;
-    }
-    
-    private List<TempHome> findTempHomes(UUID playerId, List<TempHome> tempHomes) {
-        List<TempHome> ret = new ArrayList<TempHome>();
-        for(TempHome tempHome: tempHomes) {
-            if(tempHome.getPlayerId().equals(playerId)) {
-                ret.add(tempHome);
-            }
-        }
-        return ret;
-    }
-    
-    private boolean doesPlayerExist(TempHome tempHome, OfflinePlayer[] offlinePlayers) {
+    private boolean containsOfflinePlayer(OfflinePlayer[] offlinePlayers, String playerName) {
         for(int i = 0; i < offlinePlayers.length; i++) {
-            if(tempHome.getName().equals(offlinePlayers[i].getName())) {
+            if(offlinePlayers[i].getName().equals(playerName)) {
                 return true;
             }
         }
         return false;
+    }
+    
+    private OfflinePlayer getOfflinePlayer(OfflinePlayer[] offlinePlayers, String playerName) {
+        for(int i = 0; i < offlinePlayers.length; i++) {
+            if(offlinePlayers[i].getName().equals(playerName)) {
+                return offlinePlayers[i];
+            }
+        }
+        return null;
     }
 }
