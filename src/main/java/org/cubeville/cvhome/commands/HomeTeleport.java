@@ -15,7 +15,6 @@ import org.cubeville.commons.commands.CommandParameterString;
 import org.cubeville.commons.commands.CommandResponse;
 import org.cubeville.cvhome.HomeManager;
 import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.NoAdminPermissionException;
 import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeTeleport extends Command {
@@ -32,56 +31,81 @@ public class HomeTeleport extends Command {
         
         HomeManager homeManager = HomeManager.getInstance();
         Player sender = player;
+        boolean adminOverride = sender.hasPermission("cvhome.admin.teleporthome");
         
         if(baseParameters.size() == 0) {
-            return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender.getUniqueId(), sender, 1, false);
+            return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender, 1);
         }
         else if (baseParameters.size() == 1) {
             
             String param = (String) baseParameters.get(0);
+            
             if(isArgumentInteger(param)) {
+                
                 int homeNumber = getArgumentInteger(param);
-                return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender.getUniqueId(), sender, homeNumber, false);
+                return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender, homeNumber);
+                
             }
             else if(isArgumentPlayer(param, homeManager)) {
-                OfflinePlayer serverPlayer = getArgumentPlayer(param, homeManager);
-                return teleportToPlayerHome(homeManager, sender.getUniqueId(), serverPlayer.getUniqueId(), sender, 1, sender.hasPermission("cvhome.admin.teleporthome"));
+                
+                if(!adminOverride) {
+                    throw new CommandExecutionException("&cNo permission.");
+                }
+                
+                OfflinePlayer offlinePlayer = getArgumentPlayer(param, homeManager);
+                return teleportToPlayerHome(homeManager, offlinePlayer.getUniqueId(), sender, 1);
+                
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /home [number]");
+                throw new CommandExecutionException("&cSyntax: /home");
+                //throw new CommandExecutionException("&cSyntax: /home [number]");
+                // TODO: Add this back later.
             }
         }
         else {
             
+            if(!adminOverride) {
+                throw new CommandExecutionException("&cNo permission.");
+            }
+            
             String param1 = (String) baseParameters.get(0);
             String param2 = (String) baseParameters.get(1);
+            
             if(isArgumentInteger(param1) && isArgumentPlayer(param2, homeManager)) {
+                
                 int homeNumber = getArgumentInteger(param1);
                 OfflinePlayer serverPlayer = getArgumentPlayer(param2, homeManager);
-                return teleportToPlayerHome(homeManager, sender.getUniqueId(), serverPlayer.getUniqueId(), sender, homeNumber, sender.hasPermission("cvhome.admin.teleporthome"));
+                return teleportToPlayerHome(homeManager, serverPlayer.getUniqueId(), sender, homeNumber);
+                
             }
             else if (isArgumentInteger(param2) && isArgumentPlayer(param1, homeManager)) {
+                
                 int homeNumber = getArgumentInteger(param2);
                 OfflinePlayer serverPlayer = getArgumentPlayer(param1, homeManager);
-                return teleportToPlayerHome(homeManager, sender.getUniqueId(), serverPlayer.getUniqueId(), sender, homeNumber, sender.hasPermission("cvhome.admin.teleporthome"));
+                return teleportToPlayerHome(homeManager, serverPlayer.getUniqueId(), sender, homeNumber);
+                
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /home [number]");
+                throw new CommandExecutionException("&cSyntax: /home");
+                //throw new CommandExecutionException("&cSyntax: /home [number]");
+                // TODO: Add this back later.
             }
         }
     }
     
-    private CommandResponse teleportToPlayerHome(HomeManager homeManager, UUID senderId, UUID playerId, Player sender,
-            int homeNumber, boolean adminOverride) throws CommandExecutionException {
+    private CommandResponse teleportToPlayerHome(HomeManager homeManager, UUID playerId, Player sender,
+            int homeNumber) throws CommandExecutionException {
         
         Location location = null;
         try {
-            location = homeManager.teleportToPlayerHome(senderId, playerId, homeNumber, adminOverride);
+            location = homeManager.teleportToPlayerHome(playerId, homeNumber);
         }
         catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            throw new CommandExecutionException("&cSyntax: /home [number]");
+            throw new CommandExecutionException("&cSyntax: /home");
+            //throw new CommandExecutionException("&cSyntax: /home [number]");
+            // TODO: Add this back later.
         }
-        catch (AdditionalHomeNotPermittedException | NoAdminPermissionException e) {
+        catch (AdditionalHomeNotPermittedException e) {
             throw new CommandExecutionException("&cNo permission.");
         }
         catch (PlayerHomeNotFoundException e) {

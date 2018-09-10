@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.NoAdminPermissionException;
 import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeManager implements Listener {
@@ -44,12 +43,11 @@ public class HomeManager implements Listener {
         return false;
     }
     
-    public void updatePlayerHome(UUID senderId, UUID playerId, int homeNumber, Location location, boolean adminOverride)
+    public void updatePlayerHome(UUID playerId, int homeNumber, Location location)
             throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, NoAdminPermissionException, PlayerHomeNotFoundException {
+            IndexOutOfBoundsException, PlayerHomeNotFoundException {
         
-        if(senderId == null || playerId == null || location == null) { throw new IllegalArgumentException(); }
-        if((!senderId.equals(playerId)) && (!adminOverride)) { throw new NoAdminPermissionException(); }
+        if(playerId == null || location == null) { throw new IllegalArgumentException(); }
         if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
         
         Home playerHome = getPlayerHome(playerId);
@@ -66,12 +64,11 @@ public class HomeManager implements Listener {
         save();
     }
     
-    public Location teleportToPlayerHome(UUID senderId, UUID playerId, int homeNumber, boolean adminOverride)
+    public Location teleportToPlayerHome(UUID playerId, int homeNumber)
             throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, NoAdminPermissionException, PlayerHomeNotFoundException {
+            IndexOutOfBoundsException, PlayerHomeNotFoundException {
         
-        if(senderId == null || playerId == null) { throw new IllegalArgumentException(); }
-        if((!senderId.equals(playerId)) && (!adminOverride)) { throw new NoAdminPermissionException(); }
+        if(playerId == null) { throw new IllegalArgumentException(); }
         if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
         
         Home playerHome = getPlayerHome(playerId);
@@ -85,12 +82,11 @@ public class HomeManager implements Listener {
         else { return playerHome.getHome1(); }
     }
     
-    public Location getPlayerHomeInfo(UUID playerId, int homeNumber, boolean adminOverride)
+    public Location getPlayerHomeInfo(UUID playerId, int homeNumber)
             throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, NoAdminPermissionException, PlayerHomeNotFoundException {
+            IndexOutOfBoundsException, PlayerHomeNotFoundException {
         
         if(playerId == null) { throw new IllegalArgumentException(); }
-        if(!adminOverride) { throw new NoAdminPermissionException(); }
         if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
         
         Home playerHome = getPlayerHome(playerId);

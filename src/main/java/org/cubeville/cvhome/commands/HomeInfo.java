@@ -15,7 +15,6 @@ import org.cubeville.commons.commands.CommandParameterString;
 import org.cubeville.commons.commands.CommandResponse;
 import org.cubeville.cvhome.HomeManager;
 import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.NoAdminPermissionException;
 import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeInfo extends Command {
@@ -33,12 +32,16 @@ public class HomeInfo extends Command {
         HomeManager homeManager = HomeManager.getInstance();
         Player sender = player;
         
+        if(!sender.hasPermission("cvhome.admin.infohome")) {
+            throw new CommandExecutionException("&cNo permission.");
+        }
+        
         if(baseParameters.size() == 1) {
             
             String param = (String) baseParameters.get(0);
             if(isArgumentPlayer(param, homeManager)) {
                 OfflinePlayer offlinePlayer = getArgumentPlayer(param, homeManager);
-                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, 1, sender.hasPermission("cvhome.admin.infohome"));
+                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, 1);
             }
             else {
                 throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
@@ -51,7 +54,7 @@ public class HomeInfo extends Command {
             if(isArgumentPlayer(param1, homeManager) && isArgumentInteger(param2)) {
                 OfflinePlayer offlinePlayer = getArgumentPlayer(param1, homeManager);
                 int homeNumber = getArgumentInteger(param2);
-                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, homeNumber, sender.hasPermission("cvhome.admin.infohome"));
+                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, homeNumber);
             }
             else {
                 throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
@@ -60,17 +63,14 @@ public class HomeInfo extends Command {
     }
     
     private CommandResponse getPlayerHomeInfo(HomeManager homeManager, UUID playerId, OfflinePlayer offlinePlayer,
-            int homeNumber, boolean adminOverride) throws CommandExecutionException {
+            int homeNumber) throws CommandExecutionException {
         
         Location location = null;
         try {
-            location = homeManager.getPlayerHomeInfo(playerId, homeNumber, adminOverride);
+            location = homeManager.getPlayerHomeInfo(playerId, homeNumber);
         }
         catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
-        }
-        catch (NoAdminPermissionException e) {
-            throw new CommandExecutionException("&cNo permission.");
         }
         catch (AdditionalHomeNotPermittedException e) {
             throw new CommandExecutionException("&cPlayer does not have permission for " + homeNumber + " homes!");
