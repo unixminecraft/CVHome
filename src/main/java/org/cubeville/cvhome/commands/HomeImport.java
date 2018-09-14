@@ -31,6 +31,7 @@ public class HomeImport extends Command {
         addBaseParameter(new CommandParameterString());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public CommandResponse execute(Player player, Set<String> flags, Map<String, Object> parameters, List<Object> baseParameters)
             throws CommandExecutionException {
@@ -79,58 +80,40 @@ public class HomeImport extends Command {
             line = linesReadIn.get(i);
             splitLine = line.split(delimiter);
             for(int j = 0; j < 8; j++) {
-                linesArray[i][j] = splitLine[j].substring(1, splitLine[j].length() - 1);
+                linesArray[i][j] = splitLine[j];
             }
         }
         
-        String possiblePlayerName = "";
         HomeManager homeManager = HomeManager.getInstance();
-        OfflinePlayer[] offlinePlayers = homeManager.getPlugin().getServer().getOfflinePlayers();
         OfflinePlayer offlinePlayer = null;
         Home playerHome = null;
         Location homeLocation = null;
         List<Home> playerHomes = new ArrayList<Home>();
         
         for(int i = 0; i < linesArray.length; i++) {
-           possiblePlayerName = linesArray[i][0];
-           if(containsOfflinePlayer(offlinePlayers, possiblePlayerName)) {
-               offlinePlayer = getOfflinePlayer(offlinePlayers, possiblePlayerName);
-               playerHome = new Home(offlinePlayer.getUniqueId());
-               try {
-                   homeLocation = new Location(Bukkit.getWorld(linesArray[i][1]), Double.parseDouble(linesArray[i][3]),
-                           Double.parseDouble(linesArray[i][4]), Double.parseDouble(linesArray[i][5]),
-                           Float.parseFloat(linesArray[i][7]), Float.parseFloat(linesArray[i][6]));
-               }
-               catch(NullPointerException | NumberFormatException e) {
-                   player.sendMessage(ChatColor.RED + "Problem reading in Location on line " + ChatColor.AQUA + i);
-                   continue;
-               }
-               playerHome.setHome1(homeLocation);
-               playerHomes.add(playerHome);
-           }
+            
+            offlinePlayer = homeManager.getPlugin().getServer().getOfflinePlayer(linesArray[i][0]);
+            if(offlinePlayer == null) { continue; }
+            
+            playerHome = new Home(offlinePlayer.getUniqueId());
+            try {
+                homeLocation = new Location(Bukkit.getWorld(linesArray[i][1]), Double.parseDouble(linesArray[i][3]),
+                        Double.parseDouble(linesArray[i][4]), Double.parseDouble(linesArray[i][5]),
+                        Float.parseFloat(linesArray[i][7]), Float.parseFloat(linesArray[i][6]));
+            }
+            catch(NullPointerException | NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Problem reading in Location on line " + ChatColor.AQUA + i);
+                continue;
+            }
+            
+            playerHome.setHome1(homeLocation);
+            playerHomes.add(playerHome);
+            offlinePlayer = null;
         }
         
         homeManager.setHomesFromImport(playerHomes);
        
         return new CommandResponse("&aImport complete.");
         
-    }
-    
-    private boolean containsOfflinePlayer(OfflinePlayer[] offlinePlayers, String playerName) {
-        for(int i = 0; i < offlinePlayers.length; i++) {
-            if(offlinePlayers[i].getName().equals(playerName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private OfflinePlayer getOfflinePlayer(OfflinePlayer[] offlinePlayers, String playerName) {
-        for(int i = 0; i < offlinePlayers.length; i++) {
-            if(offlinePlayers[i].getName().equals(playerName)) {
-                return offlinePlayers[i];
-            }
-        }
-        return null;
     }
 }
