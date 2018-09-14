@@ -5,9 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -29,9 +32,9 @@ public class HomeImport extends Command {
     public HomeImport() {
         super("");
         addBaseParameter(new CommandParameterString());
+        addBaseParameter(new CommandParameterString());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public CommandResponse execute(Player player, Set<String> flags, Map<String, Object> parameters, List<Object> baseParameters)
             throws CommandExecutionException {
@@ -42,78 +45,143 @@ public class HomeImport extends Command {
         
         player.sendMessage(ChatColor.AQUA + "Import starting...");
         
-        BufferedReader br = null;
-        String fileName = (String) baseParameters.get(0);
+        BufferedReader pbr = null;
+        BufferedReader hbr = null;
+        String playerFileName = (String) baseParameters.get(0);
+        String homeFileName = (String) baseParameters.get(1);
         String line = "";
-        List<String> linesReadIn = new ArrayList<String>();
+        List<String> playerLinesReadIn = new ArrayList<String>();
+        List<String> homeLinesReadIn = new ArrayList<String>();
         
         try {
-            br = new BufferedReader(new FileReader(fileName));
-            while((line = br.readLine()) != null) {
-                linesReadIn.add(line);
+            pbr = new BufferedReader(new FileReader(playerFileName));
+            while((line = pbr.readLine()) != null) {
+                playerLinesReadIn.add(line);
             }
         }
         catch(FileNotFoundException e) {
-            throw new CommandExecutionException("&cCould not open file!");
+            throw new CommandExecutionException("&cCould not open player file!");
         }
         catch(IOException e) {
-            throw new CommandExecutionException("&cError while trying to read in file contents!");
+            throw new CommandExecutionException("&cError while trying to read in player file contents!");
         }
         
-        if(br != null) {
+        if(pbr != null) {
             try {
-                br.close();
+                pbr.close();
             }
             catch (IOException e) {
-                throw new CommandExecutionException("&cError while attempting to close the reader.");
+                throw new CommandExecutionException("&cError while attempting to close the player reader.");
             }
         }
         
-        player.sendMessage(ChatColor.AQUA + "File opened and read in.");
-        
-        String[][] linesArray = new String[linesReadIn.size()][8];
         line = "";
-        String delimiter = ",";
-        String[] splitLine = null;
         
-        for(int i = 0; i < linesReadIn.size(); i++) {
-            line = linesReadIn.get(i);
-            splitLine = line.split(delimiter);
-            for(int j = 0; j < 8; j++) {
-                linesArray[i][j] = splitLine[j];
+        try {
+            hbr = new BufferedReader(new FileReader(homeFileName));
+            while((line = hbr.readLine()) != null) {
+                homeLinesReadIn.add(line);
             }
+        }
+        catch(FileNotFoundException e) {
+            throw new CommandExecutionException("&cCould not open homes file!");
+        }
+        catch(IOException e) {
+            throw new CommandExecutionException("&cError while trying to read in homes file contents!");
+        }
+        
+        if(hbr != null) {
+            try {
+                hbr.close();
+            }
+            catch (IOException e) {
+                throw new CommandExecutionException("&cError while attempting to close the home reader.");
+            }
+        }
+        
+        player.sendMessage(ChatColor.AQUA + "Files opened and read in.");
+        
+        String[][] playerLinesArray = new String[playerLinesReadIn.size()][2];
+        line = "";
+        String playerDelimiter = ";";
+        String[] playerSplitLine = null;
+        
+        for(int i = 0; i < playerLinesReadIn.size(); i++) {
+            line = playerLinesReadIn.get(i);
+            playerSplitLine = line.split(playerDelimiter);
+            for(int j = 0; j < 2; j++) {
+                playerLinesArray[i][j] = playerSplitLine[j];
+            }
+        }
+        
+        Map<String, UUID> playerUUIDs = new HashMap<String, UUID>();
+        for(int i = 0; i < playerLinesArray.length; i++) {
+            try {
+                playerUUIDs.put(playerLinesArray[i][0], UUID.fromString(playerLinesArray[i][1]));
+            }
+            catch(IllegalArgumentException e) {
+                player.sendMessage(ChatColor.YELLOW + "Unable to process UUID for player: " + playerLinesArray[i][0]);
+                continue;
+            }
+        }
+        
+        String[][] homeLinesArray = new String[homeLinesReadIn.size()][8];
+        line = "";
+        String homeDelimiter = ",";
+        String[] homeSplitLine = null;
+        
+        for(int i = 0; i < homeLinesReadIn.size(); i++) {
+            line = homeLinesReadIn.get(i);
+            homeSplitLine = line.split(homeDelimiter);
+            for(int j = 0; j < 8; j++) {
+                homeLinesArray[i][j] = homeSplitLine[j].substring(1, homeSplitLine[j].length() - 1);
+            }
+        }
+        
+        Map<String, Location> initialPlayerHomes = new HashMap<String, Location>();
+        for(int i = 0; i < homeLinesArray.length; i++) {
+            try {
+                initialPlayerHomes.put(homeLinesArray[i][0], new Location(Bukkit.getWorld(homeLinesArray[i][1]), 
+                        Double.parseDouble(homeLinesArray[i][3]), Double.parseDouble(homeLinesArray[i][4]),
+                        Double.parseDouble(homeLinesArray[i][5]), Float.parseFloat(homeLinesArray[i][7]), 
+                        Float.parseFloat(homeLinesArray[i][6])));
+            }
+            catch(NullPointerException | NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Problem reading in Location for player: " + homeLinesArray[i][0]);
+                continue;
+            }
+        }
+        
+        Iterator<String> playerHomeNames = initialPlayerHomes.keySet().iterator();
+        String playerName = null;
+        while(playerHomeNames.hasNext()) {
+            playerName = playerHomeNames.next();
+            if(!playerUUIDs.containsKey(playerName)) {
+                initialPlayerHomes.remove(playerName);
+            }
+        }
+        
+        Iterator<String> homeIterator = initialPlayerHomes.keySet().iterator();
+        playerName = null;
+        UUID playerUUID = null;
+        Home playerHome = null;
+        List<Home> finalPlayerHomes = new ArrayList<Home>();
+        while(homeIterator.hasNext()) {
+            playerName = homeIterator.next();
+            playerUUID = playerUUIDs.get(playerName);
+            if(playerUUID == null) {
+                player.sendMessage(ChatColor.RED + "Problem getting UUID for player: " + playerName);
+                continue;
+            }
+            playerHome = new Home(playerUUID);
+            playerHome.setHome1(initialPlayerHomes.get(playerName));
+            finalPlayerHomes.add(playerHome);
+            playerUUID = null;
         }
         
         HomeManager homeManager = HomeManager.getInstance();
-        OfflinePlayer offlinePlayer = null;
-        Home playerHome = null;
-        Location homeLocation = null;
-        List<Home> playerHomes = new ArrayList<Home>();
+        homeManager.setHomesFromImport(finalPlayerHomes);
         
-        for(int i = 0; i < linesArray.length; i++) {
-            
-            offlinePlayer = homeManager.getPlugin().getServer().getOfflinePlayer(linesArray[i][0]);
-            if(offlinePlayer == null) { continue; }
-            
-            playerHome = new Home(offlinePlayer.getUniqueId());
-            try {
-                homeLocation = new Location(Bukkit.getWorld(linesArray[i][1]), Double.parseDouble(linesArray[i][3]),
-                        Double.parseDouble(linesArray[i][4]), Double.parseDouble(linesArray[i][5]),
-                        Float.parseFloat(linesArray[i][7]), Float.parseFloat(linesArray[i][6]));
-            }
-            catch(NullPointerException | NumberFormatException e) {
-                player.sendMessage(ChatColor.RED + "Problem reading in Location on line " + ChatColor.AQUA + i);
-                continue;
-            }
-            
-            playerHome.setHome1(homeLocation);
-            playerHomes.add(playerHome);
-            offlinePlayer = null;
-        }
-        
-        homeManager.setHomesFromImport(playerHomes);
-       
         return new CommandResponse("&aImport complete.");
-        
     }
 }

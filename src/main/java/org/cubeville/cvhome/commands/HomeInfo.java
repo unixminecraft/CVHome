@@ -85,6 +85,7 @@ public class HomeInfo extends Command {
         ret.addMessage("&8-------------------");
         ret.addMessage("&6Home info for: &a" + offlinePlayer.getName());
         ret.addMessage("&8-------------------");
+        ret.addMessage("&bHome Number: " + homeNumber);
         ret.addMessage("&bWorld: " + location.getWorld().toString());
         ret.addMessage("&bX loc: " + location.getX());
         ret.addMessage("&bY loc: " + location.getY());
