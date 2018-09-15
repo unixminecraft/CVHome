@@ -158,29 +158,22 @@ public class HomeImport extends Command {
         
         Iterator<String> playerHomeNames = initialPlayerHomes.keySet().iterator();
         String playerName = null;
-        while(playerHomeNames.hasNext()) {
-            playerName = playerHomeNames.next();
-            if(!playerUUIDs.containsKey(playerName)) {
-                playerHomeNames.remove();
-            }
-        }
-        
-        Iterator<String> homeIterator = initialPlayerHomes.keySet().iterator();
-        playerName = null;
         UUID playerUUID = null;
         Home playerHome = null;
         List<Home> finalPlayerHomes = new ArrayList<Home>();
-        while(homeIterator.hasNext()) {
-            playerName = homeIterator.next();
-            playerUUID = playerUUIDs.get(playerName);
-            if(playerUUID == null) {
-                player.sendMessage(ChatColor.RED + "Problem getting UUID for player: " + playerName);
-                continue;
+        while(playerHomeNames.hasNext()) {
+            playerName = playerHomeNames.next();
+            if(playerUUIDs.containsKey(playerName)) {
+                playerUUID = playerUUIDs.get(playerName);
+                if(playerUUID == null) {
+                    player.sendMessage(ChatColor.RED + "Problem getting UUID for player: " + playerName);
+                    continue;
+                }
+                playerHome = new Home(playerUUID);
+                playerHome.setHome1(initialPlayerHomes.get(playerName));
+                finalPlayerHomes.add(playerHome);
+                playerUUID = null;
             }
-            playerHome = new Home(playerUUID);
-            playerHome.setHome1(initialPlayerHomes.get(playerName));
-            finalPlayerHomes.add(playerHome);
-            playerUUID = null;
         }
         
         player.sendMessage(ChatColor.AQUA + "Homes created, importing into the HomeManager.");
