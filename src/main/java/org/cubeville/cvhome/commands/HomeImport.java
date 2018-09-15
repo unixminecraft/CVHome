@@ -137,18 +137,23 @@ public class HomeImport extends Command {
             }
         }
         
+        String possiblePlayerName = null;
+        Location possiblePlayerHome = null;
         Map<String, Location> initialPlayerHomes = new HashMap<String, Location>();
         for(int i = 0; i < homeLinesArray.length; i++) {
+            possiblePlayerName = homeLinesArray[i][0];
             try {
-                initialPlayerHomes.put(homeLinesArray[i][0], new Location(Bukkit.getWorld(homeLinesArray[i][1]), 
+                possiblePlayerHome = new Location(Bukkit.getWorld(homeLinesArray[i][1]), 
                         Double.parseDouble(homeLinesArray[i][3]), Double.parseDouble(homeLinesArray[i][4]),
                         Double.parseDouble(homeLinesArray[i][5]), Float.parseFloat(homeLinesArray[i][7]), 
-                        Float.parseFloat(homeLinesArray[i][6])));
+                        Float.parseFloat(homeLinesArray[i][6]));
             }
             catch(NullPointerException | NumberFormatException e) {
                 player.sendMessage(ChatColor.RED + "Problem reading in Location for player: " + homeLinesArray[i][0]);
                 continue;
             }
+            initialPlayerHomes.put(possiblePlayerName, possiblePlayerHome);
+            possiblePlayerHome = null;
         }
         
         Iterator<String> playerHomeNames = initialPlayerHomes.keySet().iterator();
