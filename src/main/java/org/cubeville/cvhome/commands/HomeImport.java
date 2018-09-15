@@ -156,7 +156,7 @@ public class HomeImport extends Command {
         while(playerHomeNames.hasNext()) {
             playerName = playerHomeNames.next();
             if(!playerUUIDs.containsKey(playerName)) {
-                initialPlayerHomes.remove(playerName);
+                playerHomeNames.remove();
             }
         }
         
