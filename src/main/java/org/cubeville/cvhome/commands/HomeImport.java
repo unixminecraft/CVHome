@@ -183,6 +183,8 @@ public class HomeImport extends Command {
             playerUUID = null;
         }
         
+        player.sendMessage(ChatColor.AQUA + "Homes created, importing into the HomeManager.");
+        
         HomeManager homeManager = HomeManager.getInstance();
         homeManager.setHomesFromImport(finalPlayerHomes);
         
