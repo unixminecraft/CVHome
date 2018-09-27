@@ -10,6 +10,7 @@ import org.cubeville.cvhome.commands.HomeImport;
 import org.cubeville.cvhome.commands.HomeInfo;
 import org.cubeville.cvhome.commands.HomeSet;
 import org.cubeville.cvhome.commands.HomeTeleport;
+import org.cubeville.cvhome.commands.HomeUpdate;
 
 public class CVHome extends JavaPlugin {
 
@@ -18,6 +19,7 @@ public class CVHome extends JavaPlugin {
     private CommandParser infoHomeCommandParser;
     private CommandParser setHomeCommandParser;
     private CommandParser tpHomeCommandParser;
+    private CommandParser updateHomeCommandParser;
     
     private static CVHome instance;
     
@@ -32,6 +34,7 @@ public class CVHome extends JavaPlugin {
         ConfigurationSerialization.registerClass(Home.class);
         
         this.homeManager = new HomeManager(this);
+        this.homeManager.start();
         
         this.importHomeCommandParser = new CommandParser();
         this.importHomeCommandParser.addCommand(new HomeImport());
@@ -44,26 +47,33 @@ public class CVHome extends JavaPlugin {
         
         this.tpHomeCommandParser = new CommandParser();
         this.tpHomeCommandParser.addCommand(new HomeTeleport());
+        
+        this.updateHomeCommandParser = new CommandParser();
+        this.updateHomeCommandParser.addCommand(new HomeUpdate());
     }
     
     @Override
     public void onDisable() {
+        this.homeManager.stop();
         instance = null;
     }
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equals("homeimport")) {
+        if(command.getName().equals("homeimport")) {
             return this.importHomeCommandParser.execute(sender, args);
         }
-        else if (command.getName().equals("homeinfo")) {
+        else if(command.getName().equals("homeinfo")) {
             return this.infoHomeCommandParser.execute(sender, args);
         }
         else if(command.getName().equals("sethome")) {
             return this.setHomeCommandParser.execute(sender, args);
         }
-        else if (command.getName().equals("home")) {
+        else if(command.getName().equals("home")) {
             return this.tpHomeCommandParser.execute(sender, args);
+        }
+        else if(command.getName().equals("homeupdate")) {
+            return this.updateHomeCommandParser.execute(sender, args);
         }
         else {
             return false;

@@ -9,21 +9,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
-import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
-
 public class HomeManager implements Listener {
 
     private Plugin plugin;
     private List<Home> playerHomes;
     private static HomeManager instance;
     
-    @SuppressWarnings({ "static-access", "unchecked" })
+    @SuppressWarnings("static-access")
     public HomeManager(Plugin plugin) {
         this.plugin = plugin;
         this.instance = this;
-        this.playerHomes = (List<Home>) plugin.getConfig().get("Homes");
-        if(this.playerHomes == null) { this.playerHomes = new ArrayList<Home>(); }
     }
     
     public Plugin getPlugin() {
@@ -34,101 +29,95 @@ public class HomeManager implements Listener {
         return instance;
     }
     
-    public boolean doesPlayerHomeExist(UUID playerId) {
-        for(int i = 0; i < this.playerHomes.size(); i++) {
-            if(this.playerHomes.get(i).getPlayerId().equals(playerId)) {
-                return true;
-            }
-        }
-        return false;
+    @SuppressWarnings("unchecked")
+    public void start() {
+        this.playerHomes = (List<Home>) this.plugin.getConfig().get("Homes");
+        if(this.playerHomes == null) { this.playerHomes = new ArrayList<Home>(); }
     }
     
-    public void updatePlayerHome(UUID playerId, int homeNumber, Location location)
-            throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, PlayerHomeNotFoundException {
-        
-        if(playerId == null || location == null) { throw new IllegalArgumentException(); }
-        if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
-        
-        Home playerHome = getPlayerHome(playerId);
-        
-        if(playerHome == null) { throw new PlayerHomeNotFoundException(); }
-        if(checkMaxHomes(playerId) < homeNumber) { throw new AdditionalHomeNotPermittedException(); }
-        
+    public void stop() {
+        save();
+    }
+    
+    public boolean doesPlayerHomeExist(Player player) {
+        if(getPlayerHome(player) != null) { return true; }
+        else { return false; }
+    }
+    
+    public boolean doesPlayerHomeExist(String playerName) {
+        if(getPlayerHome(playerName) != null) { return true; }
+        else { return false; }
+    }
+    
+    public void updatePlayerName(Player player) {
+        UUID playerId = player.getUniqueId();
+        String playerName = player.getName();
+        Home playerHome = getPlayerHome(player);
+        if(!playerHome.getPlayerName().equals(playerName)) {
+            playerHome.setPlayerName(playerName);
+            updatePlayerHome(playerId, playerHome);
+        }
+        save();
+    }
+    
+    public void updatePlayerMaxHomes(Player player) {
+        int maxHomes = 1;
+        if(player.hasPermission("cvhome.max.4")) { maxHomes = 4; }
+        else if(player.hasPermission("cvhome.max.3")) { maxHomes = 3; }
+        else if(player.hasPermission("cvhome.max.2")) { maxHomes = 2; }
+        UUID playerId = player.getUniqueId();
+        Home playerHome = getPlayerHome(player);
+        playerHome.setMaxHomes(maxHomes);
+        updatePlayerHome(playerId, playerHome);
+        save();
+    }
+    
+    public void setPlayerHome(Player player, int homeNumber, Location location) {
+        Home playerHome = getPlayerHome(player);
         if(homeNumber == 4) { playerHome.setHome4(location); }
         else if(homeNumber == 3) { playerHome.setHome3(location); }
         else if(homeNumber == 2) { playerHome.setHome2(location); }
         else { playerHome.setHome1(location); }
-        
-        setPlayerHome(playerId, playerHome);
+        updatePlayerHome(player.getUniqueId(), playerHome);
         save();
     }
     
-    public Location teleportToPlayerHome(UUID playerId, int homeNumber)
-            throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, PlayerHomeNotFoundException {
-        
-        if(playerId == null) { throw new IllegalArgumentException(); }
-        if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
-        
-        Home playerHome = getPlayerHome(playerId);
-        
-        if(playerHome == null) { throw new PlayerHomeNotFoundException(); }
-        if(checkMaxHomes(playerId) < homeNumber) { throw new AdditionalHomeNotPermittedException(); }
-        
-        if(homeNumber == 4) { return playerHome.getHome4(); }
-        else if(homeNumber == 3) { return playerHome.getHome3(); }
-        else if(homeNumber == 2) { return playerHome.getHome2(); }
-        else { return playerHome.getHome1(); }
+    public void setPlayerHome(String playerName, int homeNumber, Location location) {
+        Home playerHome = getPlayerHome(playerName);
+        if(homeNumber == 4) { playerHome.setHome4(location); }
+        else if(homeNumber == 3) { playerHome.setHome3(location); }
+        else if(homeNumber == 2) { playerHome.setHome2(location); }
+        else { playerHome.setHome1(location); }
+        updatePlayerHome(playerName, playerHome);
+        save();
     }
     
-    public Location getPlayerHomeInfo(UUID playerId, int homeNumber)
-            throws AdditionalHomeNotPermittedException, IllegalArgumentException,
-            IndexOutOfBoundsException, PlayerHomeNotFoundException {
-        
-        if(playerId == null) { throw new IllegalArgumentException(); }
-        if(homeNumber < 1 || homeNumber > 4) { throw new IndexOutOfBoundsException(); }
-        
-        Home playerHome = getPlayerHome(playerId);
-        
-        if(playerHome == null) { throw new PlayerHomeNotFoundException(); }
-        if(checkMaxHomes(playerId) < homeNumber) { throw new AdditionalHomeNotPermittedException(); }
-        
-        if(homeNumber == 4) { return playerHome.getHome4(); }
-        else if (homeNumber == 3) { return playerHome.getHome3(); }
-        else if (homeNumber == 2) { return playerHome.getHome2(); }
-        else { return playerHome.getHome1(); }
+    public void addPlayerHome(Home playerHome) {
+        this.playerHomes.add(playerHome);
+        save();
     }
     
-    public void add(Home home) {
-        if (home == null) { throw new IllegalArgumentException(); }
-        
-        Home playerHome = null;
-        for(Home pHome: this.playerHomes) {
-            if(pHome.getPlayerId().equals(home.getPlayerId())) {
-                playerHome = pHome;
-                break;
-            }
-        }
-        if(playerHome == null) { this.playerHomes.add(home); }
-        else { this.playerHomes.set(this.playerHomes.indexOf(playerHome), home); }
+    public Location getPlayerHomeForTeleport(Player player, int homeNumber) {
+        return getPlayerHomeLocationGeneric(player, homeNumber);
     }
     
-    public void updateMaxHomes(Player player) throws IllegalArgumentException, PlayerHomeNotFoundException {
-        if(player == null) { throw new IllegalArgumentException(); }
-        
-        Home playerHome = null;
-        if(doesPlayerHomeExist(player.getUniqueId())) {
-            playerHome = getPlayerHome(player.getUniqueId());
-        }
-        
-        if(playerHome == null) { throw new PlayerHomeNotFoundException(); }
-        
-        if(player.hasPermission("cvhome.max.4")) { playerHome.setMaxHomes(4); }
-        else if(player.hasPermission("cvhome.max.3")) { playerHome.setMaxHomes(3); }
-        else if(player.hasPermission("cvhome.max.2")) { playerHome.setMaxHomes(2); }
-        else { playerHome.setMaxHomes(1); }
-        setPlayerHome(player.getUniqueId(), playerHome);
+    public Location getPlayerHomeForTeleport(String playerName, int homeNumber) {
+        return getPlayerHomeLocationGeneric(playerName, homeNumber);
+    }
+    
+    public Location getPlayerHomeForInfo(Player player, int homeNumber) {
+        return getPlayerHomeLocationGeneric(player, homeNumber);
+    }
+    public Location getPlayerHomeForInfo(String playerName, int homeNumber) {
+        return getPlayerHomeLocationGeneric(playerName, homeNumber);
+    }
+    
+    public int getMaxPlayerHomesForInfo(Player player) {
+        return getPlayerHome(player).getMaxHomes();
+    }
+    
+    public int getMaxPlayerHomesForInfo(String playerName) {
+        return getPlayerHome(playerName).getMaxHomes();
     }
     
     public void setHomesFromImport(List<Home> playerHomes) {
@@ -136,29 +125,66 @@ public class HomeManager implements Listener {
         save();
     }
     
-    private int checkMaxHomes(UUID playerId) {
-        Home playerHome = getPlayerHome(playerId);
-        return playerHome.getMaxHomes();
+    public List<Home> getHomesForUpdate() {
+        return this.playerHomes;
     }
     
-    private Home getPlayerHome(UUID playerId) {
-        Home playerHome = null;
-        for(Home home: this.playerHomes) {
-            if(home.getPlayerId().equals(playerId)) {
-                playerHome = home;
-                break;
-            }
-        }
-        return playerHome;
+    public void setHomesFromUpdate(List<Home> playerHomes) {
+        this.playerHomes = playerHomes;
+        save();
     }
     
-    private void setPlayerHome(UUID playerId, Home home) {
+    private Location getPlayerHomeLocationGeneric(Player player, int homeNumber) {
+        Home playerHome = getPlayerHome(player);
+        if(homeNumber == 4) { return playerHome.getHome4(); }
+        else if(homeNumber == 3) { return playerHome.getHome3(); }
+        else if(homeNumber == 2) { return playerHome.getHome2(); }
+        else { return playerHome.getHome1(); }
+    }
+    
+    private Location getPlayerHomeLocationGeneric(String playerName, int homeNumber) {
+        Home playerHome = getPlayerHome(playerName);
+        if(homeNumber == 4) { return playerHome.getHome4(); }
+        else if(homeNumber == 3) { return playerHome.getHome3(); }
+        else if(homeNumber == 2) { return playerHome.getHome2(); }
+        else { return playerHome.getHome1(); }
+    }
+    
+    private void updatePlayerHome(UUID playerId, Home playerHome) {
         for(int i = 0; i < this.playerHomes.size(); i++) {
             if(this.playerHomes.get(i).getPlayerId().equals(playerId)) {
-                this.playerHomes.set(i, home);
+                this.playerHomes.set(i, playerHome);
                 break;
             }
         }
+    }
+    
+    private void updatePlayerHome(String playerName, Home playerHome) {
+        for(int i = 0; i < this.playerHomes.size(); i++) {
+            if(this.playerHomes.get(i).getPlayerName().equals(playerName)) {
+                this.playerHomes.set(i, playerHome);
+                break;
+            }
+        }
+    }
+    
+    private Home getPlayerHome(Player player) {
+        UUID playerId = player.getUniqueId();
+        for(int i = 0; i < this.playerHomes.size(); i++) {
+            if(this.playerHomes.get(i).getPlayerId().equals(playerId)) {
+                return this.playerHomes.get(i);
+            }
+        }
+        return null;
+    }
+    
+    private Home getPlayerHome(String playerName) {
+        for(int i = 0; i < this.playerHomes.size(); i++) {
+            if(this.playerHomes.get(i).getPlayerName().equals(playerName)) {
+                return this.playerHomes.get(i);
+            }
+        }
+        return null;
     }
     
     private void save() {

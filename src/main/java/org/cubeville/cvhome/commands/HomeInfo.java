@@ -3,10 +3,8 @@ package org.cubeville.cvhome.commands;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import org.cubeville.commons.commands.Command;
@@ -14,15 +12,16 @@ import org.cubeville.commons.commands.CommandExecutionException;
 import org.cubeville.commons.commands.CommandParameterString;
 import org.cubeville.commons.commands.CommandResponse;
 import org.cubeville.cvhome.HomeManager;
-import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeInfo extends Command {
 
     public HomeInfo() {
         super("");
+        addFlag("1");
+        addFlag("2");
+        addFlag("3");
+        addFlag("4");
         addBaseParameter(new CommandParameterString());
-        addOptionalBaseParameter(new CommandParameterString());
     }
 
     @Override
@@ -36,99 +35,182 @@ public class HomeInfo extends Command {
             throw new CommandExecutionException("&cNo permission.");
         }
         
-        if(baseParameters.size() == 1) {
-            
-            String param = (String) baseParameters.get(0);
-            if(isArgumentPlayer(param, homeManager)) {
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param, homeManager);
-                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, 1);
+        String possiblePlayerName = (String) baseParameters.get(0);
+        Player possiblePlayer = homeManager.getPlugin().getServer().getPlayerExact(possiblePlayerName);
+        
+        if(flags.size() == 0) {
+            if(possiblePlayer != null) {
+                return getPlayerHomeInfo(homeManager, possiblePlayer, 0);
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
+                return getPlayerHomeInfo(homeManager, possiblePlayerName, 0);
+            }
+        }
+        else if(flags.size() == 1) {
+            int homeNumber = 0;
+            if(flags.contains("4")) { homeNumber = 4; }
+            else if(flags.contains("3")) { homeNumber = 3; }
+            else if(flags.contains("2")) { homeNumber = 2; }
+            else if(flags.contains("1")) { homeNumber = 1; }
+            else {
+                throw new CommandExecutionException("&cHow did you even do that? Nevermind, don't do it again.");
+            }
+            if(possiblePlayer != null) {
+                return getPlayerHomeInfo(homeManager, possiblePlayer, homeNumber);
+            }
+            else {
+                return getPlayerHomeInfo(homeManager, possiblePlayer, homeNumber);
             }
         }
         else {
-            
-            String param1 = (String) baseParameters.get(0);
-            String param2 = (String) baseParameters.get(1);
-            if(isArgumentPlayer(param1, homeManager) && isArgumentInteger(param2)) {
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param1, homeManager);
-                int homeNumber = getArgumentInteger(param2);
-                return getPlayerHomeInfo(homeManager, offlinePlayer.getUniqueId(), offlinePlayer, homeNumber);
+            throw new CommandExecutionException("&cSyntax: /homeinfo <player> [homenumber]");
+        }
+    }
+    
+    private CommandResponse getPlayerHomeInfo(HomeManager homeManager, Player player, int homeNumber)
+            throws CommandExecutionException {
+        
+        if(homeManager.doesPlayerHomeExist(player)) {
+            CommandResponse info = new CommandResponse();
+            if(homeNumber == 0) {
+                int maxHomes = homeManager.getMaxPlayerHomesForInfo(player);
+                Location location = null;
+                info.addMessage("&8-------------------");
+                info.addMessage("&6Full home info for: &a" + player.getName());
+                info.addMessage("&8-------------------");
+                info.addMessage("&bMax Homes: " + maxHomes);
+                info.addMessage("&8-------------------");
+                for(int i = 1; i <= 4; i++) {
+                    location = homeManager.getPlayerHomeForInfo(player, i);
+                    info.addMessage("&bHome 1:");
+                    if(location == null) {
+                        if(i > maxHomes) {
+                            info.addMessage("&c - Home number not permitted.");
+                            info.addMessage("&8-------------------");
+                        }
+                        else {
+                            info.addMessage("&c - Home number not set.");
+                            info.addMessage("&8-------------------");
+                        }
+                    }
+                    else {
+                        info.addMessage("&b - World: " + location.getWorld().toString());
+                        info.addMessage("&b - x pos: " + location.getX());
+                        info.addMessage("&b - y pos: " + location.getY());
+                        info.addMessage("&b - z pos: " + location.getZ());
+                        info.addMessage("&b - Pitch: " + location.getPitch());
+                        info.addMessage("&b - Yaw  : " + location.getYaw());
+                        info.addMessage("&8-------------------");
+                    }
+                }
+                return info;
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
+                int maxHomes = homeManager.getMaxPlayerHomesForInfo(player);
+                Location location = null;
+                info.addMessage("&8-------------------");
+                info.addMessage("&6Partial home info for: &a" + player.getName());
+                info.addMessage("&8-------------------");
+                info.addMessage("&bHome " + homeNumber + ":");
+                location = homeManager.getPlayerHomeForInfo(player, homeNumber);
+                if(location == null) {
+                    if(homeNumber > maxHomes) {
+                        info.addMessage("&c - Home number not permitted.");
+                        info.addMessage("&8-------------------");
+                    }
+                    else {
+                        info.addMessage("&c - Home number not set.");
+                        info.addMessage("&8-------------------");
+                    }
+                }
+                else {
+                    info.addMessage("&b - World: " + location.getWorld().toString());
+                    info.addMessage("&b - x pos: " + location.getX());
+                    info.addMessage("&b - y pos: " + location.getY());
+                    info.addMessage("&b - z pos: " + location.getZ());
+                    info.addMessage("&b - Pitch: " + location.getPitch());
+                    info.addMessage("&b - Yaw  : " + location.getYaw());
+                    info.addMessage("&8-------------------");
+                }
+                return info;
             }
         }
+        else {
+            throw new CommandExecutionException("&cPlayer home not found.");
+        }
     }
     
-    private CommandResponse getPlayerHomeInfo(HomeManager homeManager, UUID playerId, OfflinePlayer offlinePlayer,
-            int homeNumber) throws CommandExecutionException {
+    private CommandResponse getPlayerHomeInfo(HomeManager homeManager, String playerName, int homeNumber)
+            throws CommandExecutionException {
         
-        Location location = null;
-        try {
-            location = homeManager.getPlayerHomeInfo(playerId, homeNumber);
-        }
-        catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            throw new CommandExecutionException("&cSyntax: /homeinfo <player> [home_number]");
-        }
-        catch (AdditionalHomeNotPermittedException e) {
-            throw new CommandExecutionException("&cPlayer does not have permission for " + homeNumber + " homes!");
-        }
-        catch (PlayerHomeNotFoundException e) {
-            throw new CommandExecutionException("&cPlayer home not found!");
-        }
-        
-        if(location == null) { throw new CommandExecutionException("&cPlayer home not found!"); }
-        
-        CommandResponse ret = new CommandResponse();
-        ret.addMessage("&8-------------------");
-        ret.addMessage("&6Home info for: &a" + offlinePlayer.getName());
-        ret.addMessage("&8-------------------");
-        ret.addMessage("&bHome Number: " + homeNumber);
-        ret.addMessage("&bWorld: " + location.getWorld().toString());
-        ret.addMessage("&bX loc: " + location.getX());
-        ret.addMessage("&bY loc: " + location.getY());
-        ret.addMessage("&bZ loc: " + location.getZ());
-        ret.addMessage("&bPitch: " + location.getPitch());
-        ret.addMessage("&bYaw  : " + location.getYaw());
-        ret.addMessage("&8-------------------");
-        return ret;
-    }
-    
-    private boolean isArgumentInteger(String arg) {
-        try {
-            Integer.parseInt(arg);
-        }
-        catch (NumberFormatException e) {
-            return false;
-        }
-        return true;
-    }
-    
-    private int getArgumentInteger(String arg) {
-        return Integer.parseInt(arg);
-    }
-    
-    private boolean isArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer[] playerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < playerList.length; i++) {
-            if(playerList[i].getName().equalsIgnoreCase(arg)) {
-                return true;
+        if(homeManager.doesPlayerHomeExist(playerName)) {
+            CommandResponse info = new CommandResponse();
+            if(homeNumber == 0) {
+                int maxHomes = homeManager.getMaxPlayerHomesForInfo(playerName);
+                Location location = null;
+                info.addMessage("&8-------------------");
+                info.addMessage("&6Full home info for: &a" + playerName);
+                info.addMessage("&8-------------------");
+                info.addMessage("&bMax Homes: " + maxHomes);
+                info.addMessage("&8-------------------");
+                for(int i = 1; i <= 4; i++) {
+                    location = homeManager.getPlayerHomeForInfo(playerName, i);
+                    info.addMessage("&bHome 1:");
+                    if(location == null) {
+                        if(i > maxHomes) {
+                            info.addMessage("&c - Home number not permitted.");
+                            info.addMessage("&8-------------------");
+                        }
+                        else {
+                            info.addMessage("&c - Home number not set.");
+                            info.addMessage("&8-------------------");
+                        }
+                    }
+                    else {
+                        info.addMessage("&b - World: " + location.getWorld().toString());
+                        info.addMessage("&b - x pos: " + location.getX());
+                        info.addMessage("&b - y pos: " + location.getY());
+                        info.addMessage("&b - z pos: " + location.getZ());
+                        info.addMessage("&b - Pitch: " + location.getPitch());
+                        info.addMessage("&b - Yaw  : " + location.getYaw());
+                        info.addMessage("&8-------------------");
+                    }
+                }
+                return info;
+            }
+            else {
+                int maxHomes = homeManager.getMaxPlayerHomesForInfo(playerName);
+                Location location = null;
+                info.addMessage("&8-------------------");
+                info.addMessage("&6Partial home info for: &a" + playerName);
+                info.addMessage("&8-------------------");
+                info.addMessage("&bHome " + homeNumber + ":");
+                location = homeManager.getPlayerHomeForInfo(playerName, homeNumber);
+                if(location == null) {
+                    if(homeNumber > maxHomes) {
+                        info.addMessage("&c - Home number not permitted.");
+                        info.addMessage("&8-------------------");
+                    }
+                    else {
+                        info.addMessage("&c - Home number not set.");
+                        info.addMessage("&8-------------------");
+                    }
+                }
+                else {
+                    info.addMessage("&b - World: " + location.getWorld().toString());
+                    info.addMessage("&b - x pos: " + location.getX());
+                    info.addMessage("&b - y pos: " + location.getY());
+                    info.addMessage("&b - z pos: " + location.getZ());
+                    info.addMessage("&b - Pitch: " + location.getPitch());
+                    info.addMessage("&b - Yaw  : " + location.getYaw());
+                    info.addMessage("&8-------------------");
+                }
+                return info;
             }
         }
-        return false;
-    }
-    
-    private OfflinePlayer getArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer offlinePlayer = null;
-        OfflinePlayer[] offlinePlayerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < offlinePlayerList.length; i++) {
-            if(offlinePlayerList[i].getName().equalsIgnoreCase(arg)) {
-                offlinePlayer = offlinePlayerList[i];
-                break;
-            }
+        else {
+            throw new CommandExecutionException("&cPlayer not found!&r &6Please visit&r " +
+                    "&6namemc.com and check other names for that player!&r");
         }
-        return offlinePlayer;
     }
 }

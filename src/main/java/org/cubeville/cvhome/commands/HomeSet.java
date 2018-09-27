@@ -3,10 +3,8 @@ package org.cubeville.cvhome.commands;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import org.cubeville.commons.commands.Command;
@@ -15,14 +13,15 @@ import org.cubeville.commons.commands.CommandParameterString;
 import org.cubeville.commons.commands.CommandResponse;
 import org.cubeville.cvhome.Home;
 import org.cubeville.cvhome.HomeManager;
-import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeSet extends Command {
 
     public HomeSet() {
         super("");
-        addOptionalBaseParameter(new CommandParameterString());
+        addFlag("1");
+        addFlag("2");
+        addFlag("3");
+        addFlag("4");
         addOptionalBaseParameter(new CommandParameterString());
     }
 
@@ -36,197 +35,113 @@ public class HomeSet extends Command {
 
         if(baseParameters.size() == 0) {
             
-            return getOrCreatePlayerHome(homeManager, sender.getUniqueId(), sender, 1, sender.getLocation());
-        }
-        else if(baseParameters.size() == 1) {
-            
-            String param = (String) baseParameters.get(0);
-            if(isArgumentInteger(param)) {
-                
-                int homeNumber = getArgumentInteger(param);
-                return getOrCreatePlayerHome(homeManager, sender.getUniqueId(), sender, homeNumber, sender.getLocation());
-
+            if(flags.size() == 0) {
+                return setPlayerHome(homeManager, sender, 1, sender.getLocation());
             }
-            else if(isArgumentPlayer(param, homeManager)) {
-                
-                if(!adminOverride) {
-                    throw new CommandExecutionException("&cNo permission.");
-                }
-                
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param, homeManager);
-                if(offlinePlayer.isOnline()) {
-                    Player onlinePlayer = offlinePlayer.getPlayer();
-                    return getOrCreatePlayerHome(homeManager, onlinePlayer.getUniqueId(), onlinePlayer, 1, sender.getLocation());
-                }
+            //TODO: ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+            /*
+            else if(flags.size() == 1) {
+                int homeNumber = 0;
+                if(flags.contains("4")) { homeNumber = 4; }
+                else if(flags.contains("3")) { homeNumber = 3; }
+                else if(flags.contains("2")) { homeNumber = 2; }
+                else if(flags.contains("1")) { homeNumber = 1; }
                 else {
-                    return getOrCreatePlayerHome(homeManager, offlinePlayer.getUniqueId(), 1, sender.getLocation());
+                    throw new CommandExecutionException("&cInternal error, please try again later.");
                 }
-                
+                if(homeNumber == 0) {
+                    throw new CommandExecutionException("&cInternal error, please try again later.");
+                }
+                return setPlayerHome(homeManager, sender, homeNumber, sender.getLocation());
             }
+            */
             else {
                 throw new CommandExecutionException("&cSyntax: /sethome");
-                //throw new CommandExecutionException("&cSyntax: /sethome [number]");
-                // TODO: Add this back in later.
+                //TODO: REMOVE ABOVE, ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+                //throw new CommandExecutionException("&cSyntax: /home [number]");
             }
         }
         else {
-            
-            if(!adminOverride) {
-                throw new CommandExecutionException("&cNo permission.");
-            }
-            
-            String param1 = (String) baseParameters.get(0);
-            String param2 = (String) baseParameters.get(1);
-            
-            if(isArgumentInteger(param1) && isArgumentPlayer(param2, homeManager)) {
+            if(adminOverride) {
+
+                String possiblePlayerName = (String) baseParameters.get(0);
+                Player possiblePlayer = homeManager.getPlugin().getServer().getPlayerExact(possiblePlayerName);
                 
-                int homeNumber = getArgumentInteger(param1);
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param2, homeManager);
-                if(offlinePlayer.isOnline()) {
-                    Player onlinePlayer = offlinePlayer.getPlayer();
-                    return getOrCreatePlayerHome(homeManager, onlinePlayer.getUniqueId(), onlinePlayer, homeNumber, sender.getLocation());
+                if(flags.size() == 0) {
+                    if(possiblePlayer != null) {
+                        return setPlayerHome(homeManager, possiblePlayer, 1, sender.getLocation());
+                    }
+                    else {
+                        return setPlayerHome(homeManager, possiblePlayerName, 1, sender.getLocation());
+                    }
                 }
+                //TODO: ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+                /*
+                else if(flags.size() == 1) {
+                    int homeNumber = 0;
+                    if(flags.contains("4")) { homeNumber = 4; }
+                    else if(flags.contains("3")) { homeNumber = 3; }
+                    else if(flags.contains("2")) { homeNumber = 2; }
+                    else if(flags.contains("1")) { homeNumber = 1; }
+                    else {
+                        throw new CommandExecutionException("&cHow did you even do that? Nevermind, don't do it again.");
+                    }
+                    if(homeNumber == 0) {
+                        throw new CommandExecutionException("&cHow did you even do that? Nevermind, don't do it again.");
+                    }
+                    if(possiblePlayer != null) {
+                        return setPlayerHome(homeManager, possiblePlayer, homeNumber, sender.getLocation());
+                    }
+                    else {
+                        return setPlayerHome(homeManager, possiblePlayerName, homeNumber, sender.getLocation());
+                    }
+                }
+                */
                 else {
-                    return getOrCreatePlayerHome(homeManager, offlinePlayer.getUniqueId(), homeNumber, sender.getLocation());
-                }
-                
-            }
-            else if(isArgumentInteger(param2) && isArgumentPlayer(param1, homeManager)) {
-                
-                int homeNumber = getArgumentInteger(param2);
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param1, homeManager);
-                if(offlinePlayer.isOnline()) {
-                    Player onlinePlayer = offlinePlayer.getPlayer();
-                    return getOrCreatePlayerHome(homeManager, onlinePlayer.getUniqueId(), onlinePlayer, homeNumber, sender.getLocation());
-                }
-                else {
-                    return getOrCreatePlayerHome(homeManager, offlinePlayer.getUniqueId(), homeNumber, sender.getLocation());
+                    throw new CommandExecutionException("&cThe multiple homes function is disabled until further notice.");
+                    //TODO: REMOVE ABOVE, ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+                    //throw new CommandExecutionException("&cPlease only use 1 home at a time.");
                 }
                 
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /sethome");
-                //throw new CommandExecutionException("&cSyntax: /sethome [number]");
-                // TODO: Add this back in later.
+                throw new CommandExecutionException("&cNo permission.");
             }
         }
     }
     
-    private CommandResponse getOrCreatePlayerHome(HomeManager homeManager, UUID playerId,
-            Player player, int homeNumber, Location location)
-            throws CommandExecutionException {
-        if(homeManager.doesPlayerHomeExist(playerId)) {
-            return updatePlayerHome(homeManager, playerId, player, homeNumber, location);
+    private CommandResponse setPlayerHome(HomeManager homeManager, Player player, int homeNumber,
+            Location location) throws CommandExecutionException {
+        
+        if(homeManager.doesPlayerHomeExist(player)) {
+            homeManager.updatePlayerName(player);
+            homeManager.updatePlayerMaxHomes(player);
+            homeManager.setPlayerHome(player, homeNumber, location);
         }
         else {
             Home playerHome = null;
             try {
-                playerHome = new Home(playerId);
-                homeManager.add(playerHome);
+                playerHome = new Home(player.getUniqueId(), player.getName());
+                playerHome.setHome1(location);
+                homeManager.addPlayerHome(playerHome);
             }
-            catch (IllegalArgumentException e) {
+            catch(IllegalArgumentException e) {
                 throw new CommandExecutionException("&cInternal error, please try again later.");
             }
-            return updatePlayerHome(homeManager, playerId, player, homeNumber, location);
         }
+        return new CommandResponse("&aHome set.");
     }
     
-    private CommandResponse getOrCreatePlayerHome(HomeManager homeManager, UUID offlinePlayerId,
-            int homeNumber, Location location)
-            throws CommandExecutionException {
-        if(homeManager.doesPlayerHomeExist(offlinePlayerId)) {
-            return updatePlayerHome(homeManager, offlinePlayerId, homeNumber, location);
+    private CommandResponse setPlayerHome(HomeManager homeManager, String playerName, int homeNumber,
+            Location location) throws CommandExecutionException {
+        
+        if(homeManager.doesPlayerHomeExist(playerName)) {
+            homeManager.setPlayerHome(playerName, homeNumber, location);
+            return new CommandResponse("&aHome set.");
         }
         else {
-            Home offlinePlayerHome = null;
-            try {
-                offlinePlayerHome = new Home(offlinePlayerId);
-                homeManager.add(offlinePlayerHome);
-            }
-            catch (IllegalArgumentException e) {
-                throw new CommandExecutionException("&cInternal error, please try again later.");
-            }
-            return updatePlayerHome(homeManager, offlinePlayerId, homeNumber, location);
+            throw new CommandExecutionException("&cPlayer not found!&r &6Please visit&r " + 
+                    "&6namemc.com and check other names for that player!&r");
         }
-    }
-    
-    private CommandResponse updatePlayerHome(HomeManager homeManager, UUID playerId,
-            Player player, int homeNumber, Location location)
-            throws CommandExecutionException {
-        
-        try {
-            homeManager.updateMaxHomes(player);
-            homeManager.updatePlayerHome(playerId, homeNumber, location);
-        }
-        catch(IllegalArgumentException | IndexOutOfBoundsException e) {
-            throw new CommandExecutionException("&cSyntax: /sethome");
-            //throw new CommandExecutionException("&cSyntax: /sethome [number]");
-            // TODO: Add this back in later.
-        }
-        catch(AdditionalHomeNotPermittedException e) {
-            throw new CommandExecutionException("&cNo permission.");
-        }
-        catch(PlayerHomeNotFoundException e) {
-            throw new CommandExecutionException("&cPlayer home not found!");
-        }
-        
-        return new CommandResponse("&aHome set.");
-    }
-    
-    private CommandResponse updatePlayerHome(HomeManager homeManager, UUID offlinePlayerId,
-            int homeNumber, Location location)
-            throws CommandExecutionException {
-        try {
-            homeManager.updatePlayerHome(offlinePlayerId, homeNumber, location);
-        }
-        catch(IllegalArgumentException | IndexOutOfBoundsException e) {
-            throw new CommandExecutionException("&cSyntax: /sethome");
-            //throw new CommandExecutionException("&cSyntax: /sethome [number]");
-            // TODO: Add this back in later.
-        }
-        catch(AdditionalHomeNotPermittedException e) {
-            throw new CommandExecutionException("&cNo permission.");
-        }
-        catch(PlayerHomeNotFoundException e) {
-            throw new CommandExecutionException("&cPlayer home not found!");
-        }
-        
-        return new CommandResponse("&aHome set.");
-    }
-    
-    private boolean isArgumentInteger(String arg) {
-        try {
-            Integer.parseInt(arg);
-        }
-        catch (NumberFormatException e) {
-            return false;
-        }
-        return true;
-    }
-    
-    private int getArgumentInteger(String arg) {
-        return Integer.parseInt(arg);
-    }
-    
-    private boolean isArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer[] playerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < playerList.length; i++) {
-            if(playerList[i].getName().equalsIgnoreCase(arg)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private OfflinePlayer getArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer offlinePlayer = null;
-        OfflinePlayer[] offlinePlayerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < offlinePlayerList.length; i++) {
-            if(offlinePlayerList[i].getName().equalsIgnoreCase(arg)) {
-                offlinePlayer = offlinePlayerList[i];
-                break;
-            }
-        }
-        return offlinePlayer;
     }
 }

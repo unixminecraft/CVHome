@@ -177,7 +177,7 @@ public class HomeImport extends Command {
                 player.sendMessage(ChatColor.RED + "Problem getting UUID for player: " + playerName);
                 continue;
             }
-            playerHome = new Home(playerUUID);
+            playerHome = new Home(playerUUID, playerName);
             playerHome.setHome1(initialPlayerHomes.get(playerName));
             finalPlayerHomes.add(playerHome);
             playerUUID = null;

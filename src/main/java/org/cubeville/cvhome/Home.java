@@ -16,17 +16,19 @@ public class Home implements ConfigurationSerializable {
     private Location home3;
     private Location home4;
     private int maxHomes;
+    private String playerName;
     private UUID playerId;
     
-    public Home(UUID playerId) {
+    public Home(UUID playerId, String playerName) {
         
-        if(playerId == null) { throw new IllegalArgumentException(); }
+        if(playerId == null || playerName == null || playerName.equals("")) { throw new IllegalArgumentException(); }
         
         this.home1 = null;
         this.home2 = null;
         this.home3 = null;
         this.home4 = null;
         this.maxHomes = 1;
+        this.playerName = playerName;
         this.playerId = playerId;
     }
     
@@ -36,12 +38,19 @@ public class Home implements ConfigurationSerializable {
         this.home3 = (Location) config.get("home3");
         this.home4 = (Location) config.get("home4");
         this.maxHomes = ((Integer) config.get("maxhomes")).intValue();
+        if(config.containsKey("playername")) {
+            this.playerName = (String) config.get("playername");
+        }
+        else {
+            this.playerName = (String) config.get("playerid");
+        }
         this.playerId = UUID.fromString((String) config.get("playerid"));
     }
     
     public Map<String, Object> serialize() {
         Map<String, Object> ret = new HashMap<String, Object>();
         ret.put("playerid", this.playerId.toString());
+        ret.put("playername", this.playerName);
         ret.put("maxhomes", Integer.valueOf(this.maxHomes));
         ret.put("home1", this.home1);
         ret.put("home2", this.home2);
@@ -89,6 +98,15 @@ public class Home implements ConfigurationSerializable {
     public void setMaxHomes(int maxHomes) {
         if(maxHomes < 1 || maxHomes > 4) { throw new IndexOutOfBoundsException(); }
         this.maxHomes = maxHomes;
+    }
+    
+    public String getPlayerName() {
+        return this.playerName;
+    }
+    
+    public void setPlayerName(String playerName) {
+        if(playerName == null || playerName.equals("")) { throw new IllegalArgumentException(); }
+        this.playerName = playerName;
     }
     
     public UUID getPlayerId() {

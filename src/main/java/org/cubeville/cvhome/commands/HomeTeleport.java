@@ -3,10 +3,8 @@ package org.cubeville.cvhome.commands;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import org.cubeville.commons.commands.Command;
@@ -14,14 +12,15 @@ import org.cubeville.commons.commands.CommandExecutionException;
 import org.cubeville.commons.commands.CommandParameterString;
 import org.cubeville.commons.commands.CommandResponse;
 import org.cubeville.cvhome.HomeManager;
-import org.cubeville.cvhome.exceptions.AdditionalHomeNotPermittedException;
-import org.cubeville.cvhome.exceptions.PlayerHomeNotFoundException;
 
 public class HomeTeleport extends Command {
 
     public HomeTeleport() {
         super("");
-        addOptionalBaseParameter(new CommandParameterString());
+        addFlag("1");
+        addFlag("2");
+        addFlag("3");
+        addFlag("4");
         addOptionalBaseParameter(new CommandParameterString());
     }
 
@@ -34,123 +33,106 @@ public class HomeTeleport extends Command {
         boolean adminOverride = sender.hasPermission("cvhome.admin.teleporthome");
         
         if(baseParameters.size() == 0) {
-            return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender, 1);
-        }
-        else if (baseParameters.size() == 1) {
             
-            String param = (String) baseParameters.get(0);
-            
-            if(isArgumentInteger(param)) {
-                
-                int homeNumber = getArgumentInteger(param);
-                return teleportToPlayerHome(homeManager, sender.getUniqueId(), sender, homeNumber);
-                
+            if(flags.size() == 0) {
+                return teleportToPlayerHome(homeManager, sender, sender, 1);
             }
-            else if(isArgumentPlayer(param, homeManager)) {
-                
-                if(!adminOverride) {
-                    throw new CommandExecutionException("&cNo permission.");
+            //TODO: ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+            /*
+            else if(flags.size() == 1) {
+                int homeNumber = 0;
+                if(flags.contains("4")) { homeNumber = 4; }
+                else if(flags.contains("3")) { homeNumber = 3; }
+                else if(flags.contains("2")) { homeNumber = 2; }
+                else if(flags.contains("1")) { homeNumber = 1; }
+                else {
+                    throw new CommandExecutionException("&cInternal error, please try again later.");
                 }
-                
-                OfflinePlayer offlinePlayer = getArgumentPlayer(param, homeManager);
-                return teleportToPlayerHome(homeManager, offlinePlayer.getUniqueId(), sender, 1);
-                
+                if(homeNumber == 0) {
+                    throw new CommandExecutionException("&cInternal error, please try again later.");
+                }
+                return teleportToPlayerHome(homeManager, sender, sender, homeNumber);
             }
+            */
             else {
                 throw new CommandExecutionException("&cSyntax: /home");
+                //TODO: REMOVE ABOVE, ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
                 //throw new CommandExecutionException("&cSyntax: /home [number]");
-                // TODO: Add this back later.
             }
         }
         else {
-            
-            if(!adminOverride) {
-                throw new CommandExecutionException("&cNo permission.");
-            }
-            
-            String param1 = (String) baseParameters.get(0);
-            String param2 = (String) baseParameters.get(1);
-            
-            if(isArgumentInteger(param1) && isArgumentPlayer(param2, homeManager)) {
+            if(adminOverride) {
                 
-                int homeNumber = getArgumentInteger(param1);
-                OfflinePlayer serverPlayer = getArgumentPlayer(param2, homeManager);
-                return teleportToPlayerHome(homeManager, serverPlayer.getUniqueId(), sender, homeNumber);
+                String possiblePlayerName = (String) baseParameters.get(0);
+                Player possiblePlayer = homeManager.getPlugin().getServer().getPlayerExact(possiblePlayerName);
                 
-            }
-            else if (isArgumentInteger(param2) && isArgumentPlayer(param1, homeManager)) {
-                
-                int homeNumber = getArgumentInteger(param2);
-                OfflinePlayer serverPlayer = getArgumentPlayer(param1, homeManager);
-                return teleportToPlayerHome(homeManager, serverPlayer.getUniqueId(), sender, homeNumber);
-                
+                if(flags.size() == 0) {
+                    if(possiblePlayer != null) {
+                        return teleportToPlayerHome(homeManager, sender, possiblePlayer, 1);
+                    }
+                    else {
+                        return teleportToPlayerHome(homeManager, sender, possiblePlayerName, 1);
+                    }
+                }
+                //TODO: ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+                /*
+                else if(flags.size() == 1) {
+                    int homeNumber = 0;
+                    if(flags.contains("4")) { homeNumber = 4; }
+                    else if(flags.contains("3")) { homeNumber = 3; }
+                    else if(flags.contains("2")) { homeNumber = 2; }
+                    else if(flags.contains("1")) { homeNumber = 1; }
+                    else {
+                        throw new CommandExecutionException("&cHow did you even do that? Nevermind, don't do it again.");
+                    }
+                    if(homeNumber == 0) {
+                        throw new CommandExecutionException("&cHow did you even do that? Nevermind, don't do it again.");
+                    }
+                    if(possiblePlayer != null) {
+                        return teleportToPlayerHome(homeManager, sender, possiblePlayer, homeNumber);
+                    }
+                    else {
+                        return teleportToPlayerHome(homeManager, sender, possiblePlayerName, homeNumber);
+                    }
+                }
+                */
+                else {
+                    throw new CommandExecutionException("&cThe multiple homes function is disabled until further notice.");
+                    //TODO: REMOVE ABOVE, ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
+                    //throw new CommandExecutionException("&cPlease only use 1 home at a time.");
+                }
             }
             else {
-                throw new CommandExecutionException("&cSyntax: /home");
-                //throw new CommandExecutionException("&cSyntax: /home [number]");
-                // TODO: Add this back later.
+                throw new CommandExecutionException("&cNo permission.");
             }
         }
     }
     
-    private CommandResponse teleportToPlayerHome(HomeManager homeManager, UUID playerId, Player sender,
+    private CommandResponse teleportToPlayerHome(HomeManager homeManager, Player sender, Player player,
             int homeNumber) throws CommandExecutionException {
         
-        Location location = null;
-        try {
-            location = homeManager.teleportToPlayerHome(playerId, homeNumber);
+        if(homeManager.doesPlayerHomeExist(player)) {
+            homeManager.updatePlayerName(player);
+            Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
+            sender.teleport(location);
+            return new CommandResponse("&aTeleported.");
         }
-        catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            throw new CommandExecutionException("&cSyntax: /home");
-            //throw new CommandExecutionException("&cSyntax: /home [number]");
-            // TODO: Add this back later.
+        else {
+            throw new CommandExecutionException("&cPlayer home not found.");
         }
-        catch (AdditionalHomeNotPermittedException e) {
-            throw new CommandExecutionException("&cNo permission.");
-        }
-        catch (PlayerHomeNotFoundException e) {
-            throw new CommandExecutionException("&cPlayer home not found!");
-        }
+    }
+    
+    private CommandResponse teleportToPlayerHome(HomeManager homeManager, Player sender, String playerName,
+            int homeNumber) throws CommandExecutionException {
         
-        if(location == null) { throw new CommandExecutionException("&cPlayer home not found!"); }
-        
-        sender.teleport(location);
-        return new CommandResponse("&aTeleported.");
-    }
-    
-    private boolean isArgumentInteger(String arg) {
-        try {
-            Integer.parseInt(arg);
+        if(homeManager.doesPlayerHomeExist(playerName)) {
+            Location location = homeManager.getPlayerHomeForTeleport(playerName, homeNumber);
+            sender.teleport(location);
+            return new CommandResponse("&aTeleported.");
         }
-        catch (NumberFormatException e) {
-            return false;
+        else {
+            throw new CommandExecutionException("&cPlayer not found!&r &6Please visit&r " +
+                    "&6namemc.com and check other names for that player!&r");
         }
-        return true;
-    }
-    
-    private int getArgumentInteger(String arg) {
-        return Integer.parseInt(arg);
-    }
-    
-    private boolean isArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer[] playerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < playerList.length; i++) {
-            if(playerList[i].getName().equalsIgnoreCase(arg)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private OfflinePlayer getArgumentPlayer(String arg, HomeManager homeManager) {
-        OfflinePlayer offlinePlayer = null;
-        OfflinePlayer[] offlinePlayerList = homeManager.getPlugin().getServer().getOfflinePlayers();
-        for(int i = 0; i < offlinePlayerList.length; i++) {
-            if(offlinePlayerList[i].getName().equalsIgnoreCase(arg)) {
-                offlinePlayer = offlinePlayerList[i];
-                break;
-            }
-        }
-        return offlinePlayer;
     }
 }
