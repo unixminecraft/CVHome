@@ -82,7 +82,7 @@ public class HomeInfo extends Command {
                 info.addMessage("&8-------------------");
                 for(int i = 1; i <= 4; i++) {
                     location = homeManager.getPlayerHomeForInfo(player, i);
-                    info.addMessage("&bHome 1:");
+                    info.addMessage("&bHome " + i + ":");
                     if(location == null) {
                         if(i > maxHomes) {
                             info.addMessage("&c - Home number not permitted.");
@@ -94,7 +94,7 @@ public class HomeInfo extends Command {
                         }
                     }
                     else {
-                        info.addMessage("&b - World: " + location.getWorld().toString());
+                        info.addMessage("&b - World: " + location.getWorld().getName());
                         info.addMessage("&b - x pos: " + location.getX());
                         info.addMessage("&b - y pos: " + location.getY());
                         info.addMessage("&b - z pos: " + location.getZ());
@@ -124,7 +124,7 @@ public class HomeInfo extends Command {
                     }
                 }
                 else {
-                    info.addMessage("&b - World: " + location.getWorld().toString());
+                    info.addMessage("&b - World: " + location.getWorld().getName());
                     info.addMessage("&b - x pos: " + location.getX());
                     info.addMessage("&b - y pos: " + location.getY());
                     info.addMessage("&b - z pos: " + location.getZ());
@@ -155,7 +155,7 @@ public class HomeInfo extends Command {
                 info.addMessage("&8-------------------");
                 for(int i = 1; i <= 4; i++) {
                     location = homeManager.getPlayerHomeForInfo(playerName, i);
-                    info.addMessage("&bHome 1:");
+                    info.addMessage("&bHome " + i + ":");
                     if(location == null) {
                         if(i > maxHomes) {
                             info.addMessage("&c - Home number not permitted.");
@@ -167,7 +167,7 @@ public class HomeInfo extends Command {
                         }
                     }
                     else {
-                        info.addMessage("&b - World: " + location.getWorld().toString());
+                        info.addMessage("&b - World: " + location.getWorld().getName());
                         info.addMessage("&b - x pos: " + location.getX());
                         info.addMessage("&b - y pos: " + location.getY());
                         info.addMessage("&b - z pos: " + location.getZ());
@@ -197,7 +197,7 @@ public class HomeInfo extends Command {
                     }
                 }
                 else {
-                    info.addMessage("&b - World: " + location.getWorld().toString());
+                    info.addMessage("&b - World: " + location.getWorld().getName());
                     info.addMessage("&b - x pos: " + location.getX());
                     info.addMessage("&b - y pos: " + location.getY());
                     info.addMessage("&b - z pos: " + location.getZ());
