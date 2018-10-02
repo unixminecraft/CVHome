@@ -59,7 +59,7 @@ public class HomeInfo extends Command {
                 return getPlayerHomeInfo(homeManager, possiblePlayer, homeNumber);
             }
             else {
-                return getPlayerHomeInfo(homeManager, possiblePlayer, homeNumber);
+                return getPlayerHomeInfo(homeManager, possiblePlayerName, homeNumber);
             }
         }
         else {
