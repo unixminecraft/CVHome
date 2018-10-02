@@ -145,11 +145,12 @@ public class HomeInfo extends Command {
         
         if(homeManager.doesPlayerHomeExist(playerName)) {
             CommandResponse info = new CommandResponse();
+            String properPlayerName = homeManager.getProperPlayerName(playerName);
             if(homeNumber == 0) {
                 int maxHomes = homeManager.getMaxPlayerHomesForInfo(playerName);
                 Location location = null;
                 info.addMessage("&8-------------------");
-                info.addMessage("&6Full home info for: &a" + playerName);
+                info.addMessage("&6Full home info for: &a" + properPlayerName);
                 info.addMessage("&8-------------------");
                 info.addMessage("&bMax Homes: " + maxHomes);
                 info.addMessage("&8-------------------");
@@ -182,7 +183,7 @@ public class HomeInfo extends Command {
                 int maxHomes = homeManager.getMaxPlayerHomesForInfo(playerName);
                 Location location = null;
                 info.addMessage("&8-------------------");
-                info.addMessage("&6Partial home info for: &a" + playerName);
+                info.addMessage("&6Partial home info for: &a" + properPlayerName);
                 info.addMessage("&8-------------------");
                 info.addMessage("&bHome " + homeNumber + ":");
                 location = homeManager.getPlayerHomeForInfo(playerName, homeNumber);

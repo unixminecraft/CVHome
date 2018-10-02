@@ -9,7 +9,6 @@ import org.cubeville.commons.commands.CommandParser;
 import org.cubeville.cvhome.commands.HomeInfo;
 import org.cubeville.cvhome.commands.HomeSet;
 import org.cubeville.cvhome.commands.HomeTeleport;
-import org.cubeville.cvhome.commands.HomeUpdate;
 
 public class CVHome extends JavaPlugin {
 
@@ -17,7 +16,6 @@ public class CVHome extends JavaPlugin {
     private CommandParser infoHomeCommandParser;
     private CommandParser setHomeCommandParser;
     private CommandParser tpHomeCommandParser;
-    private CommandParser updateHomeCommandParser;
     
     private static CVHome instance;
     
@@ -43,8 +41,6 @@ public class CVHome extends JavaPlugin {
         this.tpHomeCommandParser = new CommandParser();
         this.tpHomeCommandParser.addCommand(new HomeTeleport());
         
-        this.updateHomeCommandParser = new CommandParser();
-        this.updateHomeCommandParser.addCommand(new HomeUpdate());
     }
     
     @Override
@@ -63,9 +59,6 @@ public class CVHome extends JavaPlugin {
         }
         else if(command.getName().equals("home")) {
             return this.tpHomeCommandParser.execute(sender, args);
-        }
-        else if(command.getName().equals("homeupdate")) {
-            return this.updateHomeCommandParser.execute(sender, args);
         }
         else {
             return false;

@@ -105,6 +105,10 @@ public class HomeManager implements Listener {
         return getPlayerHomeLocationGeneric(playerName, homeNumber);
     }
     
+    public String getProperPlayerName(String playerName) {
+        return getPlayerHome(playerName).getPlayerName();
+    }
+    
     public Location getPlayerHomeForInfo(Player player, int homeNumber) {
         return getPlayerHomeLocationGeneric(player, homeNumber);
     }
@@ -118,20 +122,6 @@ public class HomeManager implements Listener {
     
     public int getMaxPlayerHomesForInfo(String playerName) {
         return getPlayerHome(playerName).getMaxHomes();
-    }
-    
-    public void setHomesFromImport(List<Home> playerHomes) {
-        this.playerHomes = playerHomes;
-        save();
-    }
-    
-    public List<Home> getHomesForUpdate() {
-        return this.playerHomes;
-    }
-    
-    public void setHomesFromUpdate(List<Home> playerHomes) {
-        this.playerHomes = playerHomes;
-        save();
     }
     
     private Location getPlayerHomeLocationGeneric(Player player, int homeNumber) {
@@ -161,7 +151,7 @@ public class HomeManager implements Listener {
     
     private void updatePlayerHome(String playerName, Home playerHome) {
         for(int i = 0; i < this.playerHomes.size(); i++) {
-            if(this.playerHomes.get(i).getPlayerName().equals(playerName)) {
+            if(this.playerHomes.get(i).getPlayerName().equalsIgnoreCase(playerName)) {
                 this.playerHomes.set(i, playerHome);
                 break;
             }
@@ -180,7 +170,7 @@ public class HomeManager implements Listener {
     
     private Home getPlayerHome(String playerName) {
         for(int i = 0; i < this.playerHomes.size(); i++) {
-            if(this.playerHomes.get(i).getPlayerName().equals(playerName)) {
+            if(this.playerHomes.get(i).getPlayerName().equalsIgnoreCase(playerName)) {
                 return this.playerHomes.get(i);
             }
         }
