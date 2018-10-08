@@ -114,7 +114,6 @@ public class HomeSet extends Command {
             Location location) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(player)) {
-            homeManager.updatePlayerName(player);
             homeManager.updatePlayerMaxHomes(player);
             homeManager.setPlayerHome(player, homeNumber, location);
         }

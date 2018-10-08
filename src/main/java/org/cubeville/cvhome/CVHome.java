@@ -3,6 +3,9 @@ package org.cubeville.cvhome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.cubeville.commons.commands.CommandParser;
@@ -10,7 +13,7 @@ import org.cubeville.cvhome.commands.HomeInfo;
 import org.cubeville.cvhome.commands.HomeSet;
 import org.cubeville.cvhome.commands.HomeTeleport;
 
-public class CVHome extends JavaPlugin {
+public class CVHome extends JavaPlugin implements Listener {
 
     private HomeManager homeManager;
     private CommandParser infoHomeCommandParser;
@@ -41,6 +44,11 @@ public class CVHome extends JavaPlugin {
         this.tpHomeCommandParser = new CommandParser();
         this.tpHomeCommandParser.addCommand(new HomeTeleport());
         
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        this.homeManager.updatePlayerName(event.getPlayer());
     }
     
     @Override

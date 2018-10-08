@@ -35,6 +35,17 @@ public class HomeManager implements Listener {
         if(this.playerHomes == null) { this.playerHomes = new ArrayList<Home>(); }
     }
     
+    public void updatePlayerName(Player player) {
+        UUID playerId = player.getUniqueId();
+        String playerName = player.getName();
+        Home playerHome = getPlayerHome(player);
+        if(!playerHome.getPlayerName().equals(playerName)) {
+            playerHome.setPlayerName(playerName);
+            updatePlayerHome(playerId, playerHome);
+        }
+        save();
+    }
+    
     public void stop() {
         save();
     }
@@ -47,17 +58,6 @@ public class HomeManager implements Listener {
     public boolean doesPlayerHomeExist(String playerName) {
         if(getPlayerHome(playerName) != null) { return true; }
         else { return false; }
-    }
-    
-    public void updatePlayerName(Player player) {
-        UUID playerId = player.getUniqueId();
-        String playerName = player.getName();
-        Home playerHome = getPlayerHome(player);
-        if(!playerHome.getPlayerName().equals(playerName)) {
-            playerHome.setPlayerName(playerName);
-            updatePlayerHome(playerId, playerHome);
-        }
-        save();
     }
     
     public void updatePlayerMaxHomes(Player player) {

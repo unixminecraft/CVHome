@@ -112,7 +112,6 @@ public class HomeTeleport extends Command {
             int homeNumber) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(player)) {
-            homeManager.updatePlayerName(player);
             Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
             sender.teleport(location);
             return new CommandResponse("&aTeleported.");
