@@ -38,10 +38,12 @@ public class HomeManager implements Listener {
     public void updatePlayerName(Player player) {
         UUID playerId = player.getUniqueId();
         String playerName = player.getName();
-        Home playerHome = getPlayerHome(player);
-        if(!playerHome.getPlayerName().equals(playerName)) {
-            playerHome.setPlayerName(playerName);
-            updatePlayerHome(playerId, playerHome);
+        if(doesPlayerHomeExist(player)) {
+            Home playerHome = getPlayerHome(player);
+            if(!playerHome.getPlayerName().equals(playerName)) {
+                playerHome.setPlayerName(playerName);
+                updatePlayerHome(playerId, playerHome);
+            }
         }
         save();
     }
