@@ -37,8 +37,6 @@ public class HomeTeleport extends Command {
             if(flags.size() == 0) {
                 return teleportToPlayerHome(homeManager, sender, sender, 1);
             }
-            //TODO: ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-            /*
             else if(flags.size() == 1) {
                 int homeNumber = 0;
                 if(flags.contains("4")) { homeNumber = 4; }
@@ -53,7 +51,6 @@ public class HomeTeleport extends Command {
                 }
                 return teleportToPlayerHome(homeManager, sender, sender, homeNumber);
             }
-            */
             else {
                 throw new CommandExecutionException("&cSyntax: /home");
                 //TODO: REMOVE ABOVE, ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
@@ -74,8 +71,6 @@ public class HomeTeleport extends Command {
                         return teleportToPlayerHome(homeManager, sender, possiblePlayerName, 1);
                     }
                 }
-                //TODO: ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-                /*
                 else if(flags.size() == 1) {
                     int homeNumber = 0;
                     if(flags.contains("4")) { homeNumber = 4; }
@@ -95,11 +90,8 @@ public class HomeTeleport extends Command {
                         return teleportToPlayerHome(homeManager, sender, possiblePlayerName, homeNumber);
                     }
                 }
-                */
                 else {
-                    throw new CommandExecutionException("&cThe multiple homes function is disabled until further notice.");
-                    //TODO: REMOVE ABOVE, ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-                    //throw new CommandExecutionException("&cPlease only use 1 home at a time.");
+                    throw new CommandExecutionException("&cPlease only use 1 home at a time.");
                 }
             }
             else {
@@ -113,8 +105,13 @@ public class HomeTeleport extends Command {
         
         if(homeManager.doesPlayerHomeExist(player)) {
             Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
-            sender.teleport(location);
-            return new CommandResponse("&aTeleported.");
+            if(location != null) {
+                sender.teleport(location);
+                return new CommandResponse("&aTeleported.");
+            }
+            else {
+                return new CommandResponse("&cPlayer home not set.");
+            }
         }
         else {
             throw new CommandExecutionException("&cPlayer home not found.");
@@ -126,8 +123,13 @@ public class HomeTeleport extends Command {
         
         if(homeManager.doesPlayerHomeExist(playerName)) {
             Location location = homeManager.getPlayerHomeForTeleport(playerName, homeNumber);
-            sender.teleport(location);
-            return new CommandResponse("&aTeleported.");
+            if(location != null) {
+                sender.teleport(location);
+                return new CommandResponse("&aTeleported.");
+            }
+            else {
+                return new CommandResponse("&cPlayer home not set.");
+            }
         }
         else {
             throw new CommandExecutionException("&cPlayer not found!&r &6Please visit&r " +

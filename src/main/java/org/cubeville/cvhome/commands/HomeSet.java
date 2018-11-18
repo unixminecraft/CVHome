@@ -38,8 +38,6 @@ public class HomeSet extends Command {
             if(flags.size() == 0) {
                 return setPlayerHome(homeManager, sender, 1, sender.getLocation());
             }
-            //TODO: ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-            /*
             else if(flags.size() == 1) {
                 int homeNumber = 0;
                 if(flags.contains("4")) { homeNumber = 4; }
@@ -54,11 +52,10 @@ public class HomeSet extends Command {
                 }
                 return setPlayerHome(homeManager, sender, homeNumber, sender.getLocation());
             }
-            */
             else {
                 throw new CommandExecutionException("&cSyntax: /sethome");
                 //TODO: REMOVE ABOVE, ADD BELOW, ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-                //throw new CommandExecutionException("&cSyntax: /home [number]");
+                //throw new CommandExecutionException("&cSyntax: /sethome [number]");
             }
         }
         else {
@@ -75,8 +72,6 @@ public class HomeSet extends Command {
                         return setPlayerHome(homeManager, possiblePlayerName, 1, sender.getLocation());
                     }
                 }
-                //TODO: ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-                /*
                 else if(flags.size() == 1) {
                     int homeNumber = 0;
                     if(flags.contains("4")) { homeNumber = 4; }
@@ -96,11 +91,8 @@ public class HomeSet extends Command {
                         return setPlayerHome(homeManager, possiblePlayerName, homeNumber, sender.getLocation());
                     }
                 }
-                */
                 else {
-                    throw new CommandExecutionException("&cThe multiple homes function is disabled until further notice.");
-                    //TODO: REMOVE ABOVE, ADD BELOW, ONLY ONCE MULTIPLE HOMES HAS BEEN APPROVED.
-                    //throw new CommandExecutionException("&cPlease only use 1 home at a time.");
+                    throw new CommandExecutionException("&cPlease only use 1 home at a time.");
                 }
                 
             }
