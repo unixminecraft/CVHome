@@ -6,19 +6,17 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
-public class HomeManager implements Listener {
+public class HomeManager {
 
     private Plugin plugin;
     private List<Home> playerHomes;
     private static HomeManager instance;
     
-    @SuppressWarnings("static-access")
     public HomeManager(Plugin plugin) {
         this.plugin = plugin;
-        this.instance = this;
+        instance = this;
     }
     
     public Plugin getPlugin() {

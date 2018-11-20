@@ -30,6 +30,8 @@ public class CVHome extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         
+        getServer().getPluginManager().registerEvents(this, this);
+        
         ConfigurationSerialization.registerClass(Home.class);
         
         this.homeManager = new HomeManager(this);
