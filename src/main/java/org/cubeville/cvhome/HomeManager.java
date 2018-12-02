@@ -116,11 +116,11 @@ public class HomeManager {
         return getPlayerHomeLocationGeneric(playerName, homeNumber);
     }
     
-    public int getMaxPlayerHomesForInfo(Player player) {
+    public int getMaxPlayerHomes(Player player) {
         return getPlayerHome(player).getMaxHomes();
     }
     
-    public int getMaxPlayerHomesForInfo(String playerName) {
+    public int getMaxPlayerHomes(String playerName) {
         return getPlayerHome(playerName).getMaxHomes();
     }
     

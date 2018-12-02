@@ -107,14 +107,20 @@ public class HomeSet extends Command {
         
         if(homeManager.doesPlayerHomeExist(player)) {
             homeManager.updatePlayerMaxHomes(player);
-            homeManager.setPlayerHome(player, homeNumber, location);
+            int maxHomes = homeManager.getMaxPlayerHomes(player);
+            if(homeNumber > maxHomes) {
+                throw new CommandExecutionException("&cNo permission.");
+            }
+            else {
+                homeManager.setPlayerHome(player, homeNumber, location);
+            }
         }
         else {
             Home playerHome = null;
             try {
                 playerHome = new Home(player.getUniqueId(), player.getName());
-                playerHome.setHome1(location);
                 homeManager.addPlayerHome(playerHome);
+                homeManager.setPlayerHome(player, homeNumber, location);
             }
             catch(IllegalArgumentException e) {
                 throw new CommandExecutionException("&cInternal error, please try again later.");
@@ -127,8 +133,14 @@ public class HomeSet extends Command {
             Location location) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(playerName)) {
-            homeManager.setPlayerHome(playerName, homeNumber, location);
-            return new CommandResponse("&aHome set.");
+            int maxHomes = homeManager.getMaxPlayerHomes(playerName);
+            if(homeNumber > maxHomes) {
+                throw new CommandExecutionException("&cPlayer does not have permission for home " + homeNumber + "!");
+            }
+            else {
+                homeManager.setPlayerHome(playerName, homeNumber, location);
+                return new CommandResponse("&aHome set.");
+            }
         }
         else {
             throw new CommandExecutionException("&cPlayer not found!&r &6Please visit&r " + 

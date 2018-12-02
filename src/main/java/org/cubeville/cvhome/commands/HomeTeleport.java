@@ -104,13 +104,24 @@ public class HomeTeleport extends Command {
             int homeNumber) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(player)) {
-            Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
-            if(location != null) {
-                sender.teleport(location);
-                return new CommandResponse("&aTeleported.");
+            int maxHomes = homeManager.getMaxPlayerHomes(player);
+            if(homeNumber > maxHomes) {
+                if(sender.getUniqueId().equals(player.getUniqueId())) {
+                    throw new CommandExecutionException("&cNo permission.");
+                }
+                else {
+                    throw new CommandExecutionException("&cPlayer does not have permission for home " + homeNumber + "!");
+                }
             }
             else {
-                return new CommandResponse("&cPlayer home not set.");
+                Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
+                if(location != null) {
+                    sender.teleport(location);
+                    return new CommandResponse("&aTeleported.");
+                }
+                else {
+                    return new CommandResponse("&cPlayer home not set.");
+                }
             }
         }
         else {
@@ -122,13 +133,19 @@ public class HomeTeleport extends Command {
             int homeNumber) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(playerName)) {
-            Location location = homeManager.getPlayerHomeForTeleport(playerName, homeNumber);
-            if(location != null) {
-                sender.teleport(location);
-                return new CommandResponse("&aTeleported.");
+            int maxHomes = homeManager.getMaxPlayerHomes(playerName);
+            if(homeNumber > maxHomes) {
+                throw new CommandExecutionException("&cPLayer does not have permission for home " + homeNumber + "!");
             }
             else {
-                return new CommandResponse("&cPlayer home not set.");
+                Location location = homeManager.getPlayerHomeForTeleport(playerName, homeNumber);
+                if(location != null) {
+                    sender.teleport(location);
+                    return new CommandResponse("&aTeleported.");
+                }
+                else {
+                    return new CommandResponse("&cPlayer home not set.");
+                }
             }
         }
         else {
