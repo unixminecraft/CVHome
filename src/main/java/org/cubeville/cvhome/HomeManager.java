@@ -61,6 +61,7 @@ public class HomeManager {
     }
     
     public void updatePlayerMaxHomes(Player player) {
+        if(!doesPlayerHomeExist(player)) { return; }
         int maxHomes = 1;
         if(player.hasPermission("cvhome.max.4")) { maxHomes = 4; }
         else if(player.hasPermission("cvhome.max.3")) { maxHomes = 3; }
@@ -73,21 +74,17 @@ public class HomeManager {
     }
     
     public void setPlayerHome(Player player, int homeNumber, Location location) {
+        if(!doesPlayerHomeExist(player)) { return; }
         Home playerHome = getPlayerHome(player);
-        if(homeNumber == 4) { playerHome.setHome4(location); }
-        else if(homeNumber == 3) { playerHome.setHome3(location); }
-        else if(homeNumber == 2) { playerHome.setHome2(location); }
-        else { playerHome.setHome1(location); }
+        playerHome.setHome(location, homeNumber);
         updatePlayerHome(player.getUniqueId(), playerHome);
         save();
     }
     
     public void setPlayerHome(String playerName, int homeNumber, Location location) {
+        if(!doesPlayerHomeExist(playerName)) { return; }
         Home playerHome = getPlayerHome(playerName);
-        if(homeNumber == 4) { playerHome.setHome4(location); }
-        else if(homeNumber == 3) { playerHome.setHome3(location); }
-        else if(homeNumber == 2) { playerHome.setHome2(location); }
-        else { playerHome.setHome1(location); }
+        playerHome.setHome(location, homeNumber);
         updatePlayerHome(playerName, playerHome);
         save();
     }
@@ -106,6 +103,7 @@ public class HomeManager {
     }
     
     public String getProperPlayerName(String playerName) {
+        if(!doesPlayerHomeExist(playerName)) { return "NO HOME EXISTS"; }
         return getPlayerHome(playerName).getPlayerName();
     }
     
@@ -117,27 +115,23 @@ public class HomeManager {
     }
     
     public int getMaxPlayerHomes(Player player) {
+        if(!doesPlayerHomeExist(player)) { return 1; }
         return getPlayerHome(player).getMaxHomes();
     }
     
     public int getMaxPlayerHomes(String playerName) {
+        if(!doesPlayerHomeExist(playerName)) { return 1; }
         return getPlayerHome(playerName).getMaxHomes();
     }
     
     private Location getPlayerHomeLocationGeneric(Player player, int homeNumber) {
-        Home playerHome = getPlayerHome(player);
-        if(homeNumber == 4) { return playerHome.getHome4(); }
-        else if(homeNumber == 3) { return playerHome.getHome3(); }
-        else if(homeNumber == 2) { return playerHome.getHome2(); }
-        else { return playerHome.getHome1(); }
+        if(!doesPlayerHomeExist(player)) { return null; }
+        return getPlayerHome(player).getHome(homeNumber);
     }
     
     private Location getPlayerHomeLocationGeneric(String playerName, int homeNumber) {
-        Home playerHome = getPlayerHome(playerName);
-        if(homeNumber == 4) { return playerHome.getHome4(); }
-        else if(homeNumber == 3) { return playerHome.getHome3(); }
-        else if(homeNumber == 2) { return playerHome.getHome2(); }
-        else { return playerHome.getHome1(); }
+        if(!doesPlayerHomeExist(playerName)) { return null; }
+        return getPlayerHome(playerName).getHome(homeNumber);
     }
     
     private void updatePlayerHome(UUID playerId, Home playerHome) {

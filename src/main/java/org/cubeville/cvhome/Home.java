@@ -59,36 +59,27 @@ public class Home implements ConfigurationSerializable {
         return ret;
     }
     
-    public Location getHome1() {
-        return this.home1;
+    public Location getHome(int homeNumber) {
+        if(homeNumber < 1 || homeNumber > 4) {
+            throw new IndexOutOfBoundsException();
+        }
+        if(homeNumber == 4) { return this.home4; }
+        else if(homeNumber == 3) { return this.home3; }
+        else if(homeNumber == 2) { return this.home2; }
+        else { return this.home1; }
     }
     
-    public void setHome1(Location home) {
-        this.home1 = home;
-    }
-    
-    public Location getHome2() {
-        return this.home2;
-    }
-    
-    public void setHome2(Location home) {
-        this.home2 = home;
-    }
-    
-    public Location getHome3() {
-        return this.home3;
-    }
-    
-    public void setHome3(Location home) {
-        this.home3 = home;
-    }
-    
-    public Location getHome4() {
-        return this.home4;
-    }
-    
-    public void setHome4(Location home) {
-        this.home4 = home;
+    public void setHome(Location home, int homeNumber) {
+        if(home == null) {
+            throw new IllegalArgumentException();
+        }
+        if(homeNumber < 1 || homeNumber > 4) {
+            throw new IndexOutOfBoundsException();
+        }
+        if(homeNumber == 4) { this.home4 = home; }
+        else if(homeNumber == 3) { this.home3 = home; }
+        else if(homeNumber == 2) { this.home2 = home; }
+        else { this.home1 = home; }
     }
     
     public int getMaxHomes() {

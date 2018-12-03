@@ -51,6 +51,7 @@ public class CVHome extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         this.homeManager.updatePlayerName(event.getPlayer());
+        this.homeManager.updatePlayerMaxHomes(event.getPlayer());
     }
     
     @Override

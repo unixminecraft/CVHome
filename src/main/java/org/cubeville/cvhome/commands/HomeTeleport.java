@@ -104,6 +104,7 @@ public class HomeTeleport extends Command {
             int homeNumber) throws CommandExecutionException {
         
         if(homeManager.doesPlayerHomeExist(player)) {
+            homeManager.updatePlayerMaxHomes(player);
             int maxHomes = homeManager.getMaxPlayerHomes(player);
             if(homeNumber > maxHomes) {
                 if(sender.getUniqueId().equals(player.getUniqueId())) {
