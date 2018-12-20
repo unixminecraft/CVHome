@@ -25,11 +25,10 @@ public class HomeInfo extends Command {
     }
 
     @Override
-    public CommandResponse execute(Player player, Set<String> flags, Map<String, Object> parameters, List<Object> baseParameters)
+    public CommandResponse execute(Player sender, Set<String> flags, Map<String, Object> parameters, List<Object> baseParameters)
             throws CommandExecutionException {
         
-        HomeManager homeManager = HomeManager.getInstance();
-        Player sender = player;
+        HomeManager homeManager = HomeManager.instance();
         
         if(!sender.hasPermission("cvhome.admin.infohome")) {
             throw new CommandExecutionException("&cNo permission.");
@@ -70,10 +69,10 @@ public class HomeInfo extends Command {
     private CommandResponse getPlayerHomeInfo(HomeManager homeManager, Player player, int homeNumber)
             throws CommandExecutionException {
         
-        if(homeManager.doesPlayerHomeExist(player)) {
+        if(homeManager.homeExists(player)) {
             CommandResponse info = new CommandResponse();
             if(homeNumber == 0) {
-                int maxHomes = homeManager.getMaxPlayerHomes(player);
+                int maxHomes = homeManager.getMaxHomes(player);
                 Location location = null;
                 info.addMessage("&8-------------------");
                 info.addMessage("&6Full home info for: &a" + player.getName());
@@ -81,7 +80,7 @@ public class HomeInfo extends Command {
                 info.addMessage("&bMax Homes: " + maxHomes);
                 info.addMessage("&8-------------------");
                 for(int i = 1; i <= 4; i++) {
-                    location = homeManager.getPlayerHomeForInfo(player, i);
+                    location = homeManager.getHome(player, i);
                     info.addMessage("&bHome " + i + ":");
                     if(location == null) {
                         if(i > maxHomes) {
@@ -106,13 +105,13 @@ public class HomeInfo extends Command {
                 return info;
             }
             else {
-                int maxHomes = homeManager.getMaxPlayerHomes(player);
+                int maxHomes = homeManager.getMaxHomes(player);
                 Location location = null;
                 info.addMessage("&8-------------------");
                 info.addMessage("&6Partial home info for: &a" + player.getName());
                 info.addMessage("&8-------------------");
                 info.addMessage("&bHome " + homeNumber + ":");
-                location = homeManager.getPlayerHomeForInfo(player, homeNumber);
+                location = homeManager.getHome(player, homeNumber);
                 if(location == null) {
                     if(homeNumber > maxHomes) {
                         info.addMessage("&c - Home number not permitted.");
@@ -143,11 +142,11 @@ public class HomeInfo extends Command {
     private CommandResponse getPlayerHomeInfo(HomeManager homeManager, String playerName, int homeNumber)
             throws CommandExecutionException {
         
-        if(homeManager.doesPlayerHomeExist(playerName)) {
+        if(homeManager.homeExists(playerName)) {
             CommandResponse info = new CommandResponse();
-            String properPlayerName = homeManager.getProperPlayerName(playerName);
+            String properPlayerName = homeManager.getPlayerName(playerName);
             if(homeNumber == 0) {
-                int maxHomes = homeManager.getMaxPlayerHomes(playerName);
+                int maxHomes = homeManager.getMaxHomes(playerName);
                 Location location = null;
                 info.addMessage("&8-------------------");
                 info.addMessage("&6Full home info for: &a" + properPlayerName);
@@ -155,7 +154,7 @@ public class HomeInfo extends Command {
                 info.addMessage("&bMax Homes: " + maxHomes);
                 info.addMessage("&8-------------------");
                 for(int i = 1; i <= 4; i++) {
-                    location = homeManager.getPlayerHomeForInfo(playerName, i);
+                    location = homeManager.getHome(playerName, i);
                     info.addMessage("&bHome " + i + ":");
                     if(location == null) {
                         if(i > maxHomes) {
@@ -180,13 +179,13 @@ public class HomeInfo extends Command {
                 return info;
             }
             else {
-                int maxHomes = homeManager.getMaxPlayerHomes(playerName);
+                int maxHomes = homeManager.getMaxHomes(playerName);
                 Location location = null;
                 info.addMessage("&8-------------------");
                 info.addMessage("&6Partial home info for: &a" + properPlayerName);
                 info.addMessage("&8-------------------");
                 info.addMessage("&bHome " + homeNumber + ":");
-                location = homeManager.getPlayerHomeForInfo(playerName, homeNumber);
+                location = homeManager.getHome(playerName, homeNumber);
                 if(location == null) {
                     if(homeNumber > maxHomes) {
                         info.addMessage("&c - Home number not permitted.");

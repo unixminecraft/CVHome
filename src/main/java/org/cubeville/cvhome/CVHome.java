@@ -20,56 +20,47 @@ public class CVHome extends JavaPlugin implements Listener {
     private CommandParser setHomeCommandParser;
     private CommandParser tpHomeCommandParser;
     
-    private static CVHome instance;
-    
-    public static CVHome getInstance() {
-        return instance;
-    }
-    
     @Override
     public void onEnable() {
-        instance = this;
-        
         getServer().getPluginManager().registerEvents(this, this);
         
         ConfigurationSerialization.registerClass(Home.class);
         
-        this.homeManager = new HomeManager(this);
-        this.homeManager.start();
+        homeManager = new HomeManager(this);
+        homeManager.start();
         
-        this.infoHomeCommandParser = new CommandParser();
-        this.infoHomeCommandParser.addCommand(new HomeInfo());
+        infoHomeCommandParser = new CommandParser();
+        infoHomeCommandParser.addCommand(new HomeInfo());
         
-        this.setHomeCommandParser = new CommandParser();
-        this.setHomeCommandParser.addCommand(new HomeSet());
+        setHomeCommandParser = new CommandParser();
+        setHomeCommandParser.addCommand(new HomeSet());
         
-        this.tpHomeCommandParser = new CommandParser();
-        this.tpHomeCommandParser.addCommand(new HomeTeleport());
+        tpHomeCommandParser = new CommandParser();
+        tpHomeCommandParser.addCommand(new HomeTeleport());
         
     }
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        this.homeManager.updatePlayerName(event.getPlayer());
-        this.homeManager.updatePlayerMaxHomes(event.getPlayer());
+        homeManager.updatePlayerName(event.getPlayer());
+        homeManager.updatePlayerMaxHomes(event.getPlayer());
     }
     
     @Override
     public void onDisable() {
-        this.homeManager.stop();
-        instance = null;
+        homeManager.stop();
     }
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(command.getName().equals("homeinfo")) {
-            return this.infoHomeCommandParser.execute(sender, args);
+            return infoHomeCommandParser.execute(sender, args);
         }
         else if(command.getName().equals("sethome")) {
-            return this.setHomeCommandParser.execute(sender, args);
+            return setHomeCommandParser.execute(sender, args);
         }
         else if(command.getName().equals("home")) {
-            return this.tpHomeCommandParser.execute(sender, args);
+            return tpHomeCommandParser.execute(sender, args);
         }
         else {
             return false;

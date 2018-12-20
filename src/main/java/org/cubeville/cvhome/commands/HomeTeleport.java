@@ -28,14 +28,17 @@ public class HomeTeleport extends Command {
     public CommandResponse execute(Player player, Set<String> flags, Map<String, Object> parameters, List<Object> baseParameters)
             throws CommandExecutionException {
         
-        HomeManager homeManager = HomeManager.getInstance();
+        HomeManager homeManager = HomeManager.instance();
         Player sender = player;
         boolean adminOverride = sender.hasPermission("cvhome.admin.teleporthome");
         
         if(baseParameters.size() == 0) {
             
             if(flags.size() == 0) {
-                return teleportToPlayerHome(homeManager, sender, sender, 1);
+                System.out.println("Teleporting to player home: " + System.currentTimeMillis());
+                CommandResponse resp = teleportToPlayerHome(homeManager, sender, sender, 1);
+                System.out.println("Done teleporting to player home: " + System.currentTimeMillis());
+                return resp;
             }
             else if(flags.size() == 1) {
                 int homeNumber = 0;
@@ -103,9 +106,9 @@ public class HomeTeleport extends Command {
     private CommandResponse teleportToPlayerHome(HomeManager homeManager, Player sender, Player player,
             int homeNumber) throws CommandExecutionException {
         
-        if(homeManager.doesPlayerHomeExist(player)) {
+        if(homeManager.homeExists(player)) {
             homeManager.updatePlayerMaxHomes(player);
-            int maxHomes = homeManager.getMaxPlayerHomes(player);
+            int maxHomes = homeManager.getMaxHomes(player);
             if(homeNumber > maxHomes) {
                 if(sender.getUniqueId().equals(player.getUniqueId())) {
                     throw new CommandExecutionException("&cNo permission.");
@@ -115,7 +118,7 @@ public class HomeTeleport extends Command {
                 }
             }
             else {
-                Location location = homeManager.getPlayerHomeForTeleport(player, homeNumber);
+                Location location = homeManager.getHome(player, homeNumber);
                 if(location != null) {
                     sender.teleport(location);
                     return new CommandResponse("&aTeleported.");
@@ -133,13 +136,13 @@ public class HomeTeleport extends Command {
     private CommandResponse teleportToPlayerHome(HomeManager homeManager, Player sender, String playerName,
             int homeNumber) throws CommandExecutionException {
         
-        if(homeManager.doesPlayerHomeExist(playerName)) {
-            int maxHomes = homeManager.getMaxPlayerHomes(playerName);
+        if(homeManager.homeExists(playerName)) {
+            int maxHomes = homeManager.getMaxHomes(playerName);
             if(homeNumber > maxHomes) {
                 throw new CommandExecutionException("&cPLayer does not have permission for home " + homeNumber + "!");
             }
             else {
-                Location location = homeManager.getPlayerHomeForTeleport(playerName, homeNumber);
+                Location location = homeManager.getHome(playerName, homeNumber);
                 if(location != null) {
                     sender.teleport(location);
                     return new CommandResponse("&aTeleported.");
