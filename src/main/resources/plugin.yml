@@ -1,42 +1,55 @@
 name: CVHome
 main: org.cubeville.cvhome.CVHome
-author: unixadmin
-version: 0.1
+author: mciolkosz
+version: 1.1
+api-version: 1.15
 
 depend: [CVTools]
 
 commands:
   sethome:
-    description: Set a home command
+    description: Command to set the player's home location
+    permission: cvhome.command.sethome
+    permission-message: §cNo permission.
+    usage: "§cSyntax: /sethome"
+    aliases: homeset
   home:
-    description: Teleport to a home command
+    description: Command to teleport to the player's home location
+    permission: cvhome.command.home
+    permission-message: §cNo permission.
+    usage: "§cSyntax: /home"
   homeinfo:
-    description: Get information on a home
-  homeupdate:
-    description: Update player homes with player names.
+    description: Command to get the player's home location information.
+    permission: cvhome.command.homeinfo
+    permission-message: §cNo permission.
+    usage: "§cSyntax: /homeinfo"
+    aliases: infohome
 
 permissions:
-  cvhome.max.1:
-    description: Maximum of 1 home.
-    default: true
   cvhome.max.2:
-    description: Maximum of 2 homes.
+    description: Maximum of 2 homes
     default: op
   cvhome.max.3:
-    description: Maximum of 3 homes.
+    description: Maximum of 3 homes
     default: false
   cvhome.max.4:
-    description: Maximum of 4 homes.
+    description: Maximum of 4 homes
     default: false
-  cvhome.admin.sethome:
-    description: Admin override to set homes for any player.
+  cvhome.command.sethome:
+    description: Permission to use the /sethome command
+    default: true
+  cvhome.command.sethome.other:
+    description: Permission to use the /sethome command to set another player's home
     default: op
-  cvhome.admin.teleporthome:
-    description: Admin override to teleport to any players' homes.
+  cvhome.command.home:
+    description: Permission to use the /home command
+    default: true
+  cvhome.command.home.other:
+    description: Permission to use the /home command to teleport to another player's home
     default: op
-  cvhome.admin.infohome:
-    description: Admin override to get a player's home information.
+  cvhome.command.homeinfo:
+    description: Permission to use the /homeinfo command
     default: op
-  cvhome.admin.updatehome:
-    description: Admin override to update player's homes to include player names.
+  cvhome.command.homeinfo.other:
+    description: Permission to use the /homeinfo command to view information about another player's home
     default: op
