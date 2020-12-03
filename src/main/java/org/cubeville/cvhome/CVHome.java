@@ -113,7 +113,7 @@ public final class CVHome extends JavaPlugin implements Listener {
         else if(command.getName().equals("sethome")) {
             return setParser.execute(sender, args);
         }
-        else if(command.getName().equals("home")) {
+        else if(command.getName().equals("gohome")) {
             return teleportParser.execute(sender, args);
         }
         else {

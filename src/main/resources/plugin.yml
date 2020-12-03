@@ -17,7 +17,7 @@ commands:
     description: Command to teleport to the player's home location
     permission: cvhome.command.home
     permission-message: §cNo permission.
-    usage: "§cSyntax: /home"
+    usage: "§cSyntax: /gohome"
   homeinfo:
     description: Command to get the player's home location information.
     permission: cvhome.command.homeinfo
